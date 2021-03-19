@@ -1,0 +1,20 @@
+[default]
+
+[development]
+doc_type = 'docx'
+origins = '*'
+service_host = '0.0.0.0'
+service_port = 6000
+
+[development.app]
+title = "Приложение автоматизации составления сюрвейерских отчетов определенного шаблона."
+version = "1.0"
+description = """
+Представляет собой клиент-серверное приложение, работающее по протоколу HTTP. Сервер составляет отчет из полученных от
+клиента данных и из имеющихся шаблонов, сохраняет отчет и возвращает клиенту готовый файл.
+"""
+
+[development.repository]
+templates_dir = "resources"
+reports_dir = "resources"
+
