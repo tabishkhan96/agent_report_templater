@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import date
 from typing import Optional, List, Union
 from pydantic import BaseModel
 
@@ -48,7 +48,7 @@ class Application(BaseModel):
     cultivar: Union[List[str], str]
     units: Union[List[str], str]
     invoice: Union[List[str], str]
-    date: Union[List[str], str]
+    date: Union[List[date], date]
     calibre: Union[List[str], str]
     terminal: Union[List[str], str]
     expeditor: Union[List[str], str]
@@ -64,7 +64,7 @@ class Header(BaseModel):
     """Модель заголовка отчета"""
     number: str = "IL-NS-0"
     place: Optional[str] = None
-    date: Optional[Union[List[str], str]] = datetime.today().strftime('%d.%m.%Y')
+    date: Optional[Union[List[str], str]] = date.today().strftime('%d.%m.%Y')
     shipper: Optional[Union[List[str], str]] = None
     cargo: Optional[str] = None
     transport_units: Optional[List[str]] = None
