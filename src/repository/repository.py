@@ -154,13 +154,14 @@ class AgentReportRepository:
                     f"{settings.REPOSITORY.TEMPLATES_DIR}/photos_template.{settings.DOC_TYPE}"
                 ).get_tables()[0]
             )
+            doc.append_table(photos_table)
+            doc.add_page_break()
+            photos_table = doc.get_tables()[-1]
+
             for row in range(2):
                 for cell in photos_table.row_cells(row):
                     doc.insert_picture_into_cell(cell, chunk[i])
                     i += 1
-
-            doc.append_table(photos_table)
-            doc.add_page_break()
 
         doc.save(f"{settings.REPOSITORY.REPORTS_DIR}/{filename[33:]}")
         os.remove(f"{settings.REPOSITORY.REPORTS_DIR}/{filename}")
