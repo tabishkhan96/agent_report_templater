@@ -1,3 +1,4 @@
+import logging
 import os
 import uuid
 from copy import deepcopy
@@ -17,6 +18,7 @@ class AgentReportRepository:
     """Репозиторий бизнес-логики приложения"""
 
     def __init__(self, document_dao: Type[DocumentDAOInterface]):
+        self.logger: logging.Logger = logging.getLogger("repository")
         self.document_dao: Type[DocumentDAOInterface] = document_dao
 
     def create_report(self, application: Application) -> str:
@@ -106,7 +108,6 @@ class AgentReportRepository:
 
         doc.append_table(results_table)
         doc.append_table(calibre_table)
-        # добавляем таблицу "заключение" без изменений
         doc.append_table(conclusion_table)
         doc.append_table(shelf_life_table)
         doc.append_table(executor_table)
