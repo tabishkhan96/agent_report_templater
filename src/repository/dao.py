@@ -11,9 +11,7 @@ from src.repository.models import Table, Cell
 
 
 class DocumentDAOInterface(ABC):
-    """
-    Интерфейс класса доступа к документам
-    """
+    """Интерфейс класса доступа к документам"""
     def __init__(self, path: str):
         self._document: Union[DocxDocument, Any] = self.load(path)
 

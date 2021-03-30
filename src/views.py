@@ -13,17 +13,13 @@ report_api: APIRouter = APIRouter()
 
 @report_api.put("/", name="Создание отчета.")
 async def create_report(application: Application = Body(..., title="Заявка по выбранному заказу")) -> str:
-    """
-    Создание черновика отчета.
-    """
+    """Создание черновика отчета."""
     return REPOSITORY.create_report(application)
 
 
 @report_api.get("/", response_model=List[Header], name="Отчеты в работе")
 async def reports_in_progress() -> List[Header]:
-    """
-    Отчеты в работе.
-    """
+    """Отчеты в работе."""
     return REPOSITORY.get_reports()
 
 

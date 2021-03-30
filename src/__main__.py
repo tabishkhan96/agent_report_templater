@@ -18,9 +18,7 @@ app.include_router(report_api, prefix='/report')
 
 @app.exception_handler(AppException)
 def client_exc_handler(request: Request, exc: AppException):
-    """
-    Обработка исключений приложения
-    """
+    """Обработка исключений приложения"""
     logger.exception(exc.__doc__)
     return JSONResponse(status_code=400, content={"detail": exc.__doc__})
 
