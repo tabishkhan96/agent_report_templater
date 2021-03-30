@@ -5,7 +5,7 @@ logging = "resources/logging.toml"
 doc_type = 'docx'
 origins = '*'
 service_host = '0.0.0.0'
-service_port = 6000
+service_port = 8080
 
 [development.app]
 title = "Приложение автоматизации составления сюрвейерских отчетов определенного шаблона."
