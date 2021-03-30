@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import date
-from typing import Optional, List, Union
-from pydantic import BaseModel
+from typing import List, Union
+from pydantic import BaseModel, validator
 
 
 class Cell(ABC):
@@ -38,6 +38,7 @@ class Table(ABC):
 class Application(BaseModel):
     """Заявка"""
     place_of_inspection: str
+    report_number: str
     order: str
     supplier: Union[List[str], str]
     BL: Union[List[str], str]
@@ -55,6 +56,13 @@ class Application(BaseModel):
     organization: Union[List[str], str]
     remark: Union[List[str], str]
 
+    @validator("date", pre=True)
+    def get_date(cls, value: Union[int, List[int]]):
+        """Transform timestamp to datetime object"""
+        if isinstance(value, list):
+            return [date.fromtimestamp(date_object/1000) for date_object in value]
+        return date.fromtimestamp(value/1000)
+
 
 class BillOfLading(BaseModel):
     """Коносамент"""
@@ -62,13 +70,13 @@ class BillOfLading(BaseModel):
 
 class Header(BaseModel):
     """Модель заголовка отчета"""
-    number: str = "IL-NS-0"
-    place: Optional[str] = None
-    date: Optional[Union[List[str], str]] = date.today().strftime('%d.%m.%Y')
-    shipper: Optional[Union[List[str], str]] = None
-    cargo: Optional[str] = None
-    transport_units: Optional[List[str]] = None
-    vessel: Optional[Union[List[str], str]] = None
-    invoice: Optional[Union[List[str], str]] = None
-    order: Optional[str] = None
-    BL: Optional[Union[List[str], str]] = None
+    report_number: str = "IL-NS-0"
+    place: str
+    date: Union[List[str], str] = date.today().strftime('%d.%m.%Y')
+    shipper: Union[List[str], str]
+    cargo: str
+    transport_units: List[str]
+    vessel: Union[List[str], str]
+    invoice: Union[List[str], str]
+    order: str
+    BL: Union[List[str], str]

@@ -6,6 +6,7 @@ class TestDoc:
 
 
 TEST_APPLICATION = Application(
+    report_number="IL-AC-000",
     place_of_inspection="РЦ Альфа Центавра / RC Alpha Centauri",
     order="LV-426",
     supplier="Weyland-Yutani Corp",
@@ -17,7 +18,7 @@ TEST_APPLICATION = Application(
     cultivar="",
     units='megatons',
     invoice=['XYZ2020000001283/', 'XYZ2020000001284/'],
-    date=["2020-12-18", "2020-12-19"],
+    date=["Tue Dec 08 2020", "Sun Dec 06 2020"],
     calibre='18mm',
     terminal='term',
     expeditor='Nastromo',

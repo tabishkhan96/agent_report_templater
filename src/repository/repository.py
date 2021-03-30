@@ -32,6 +32,7 @@ class AgentReportRepository:
         :return str: хеш созданного черновика
         """
         header_data: Header = Header(
+            report_number=application.report_number,
             place=application.place_of_inspection,
             shipper=application.supplier,
             cargo=application.cargo,
