@@ -122,10 +122,11 @@ class AgentReportRepository:
             doc.add_page_break()
 
         doc_guid: str = uuid.uuid4().hex
-        doc.save(
-            f"{settings.REPOSITORY.REPORTS_DIR}/"
-            f"{doc_guid}_Заказ_{header_data.order}.{settings.DOC_TYPE}"
-        )
+        filename: str = f"{doc_guid}_{header_data.report_number}_{header_data.order}_" \
+                        f"{header_data.shipper}_{header_data.cargo}".replace("/", '')
+
+        doc.save(f"{settings.REPOSITORY.REPORTS_DIR}/{filename}.{settings.DOC_TYPE}")
+        self.logger.info(f"Doc saved to '{settings.REPOSITORY.REPORTS_DIR}/' with GUID {doc_guid}.")
         return doc_guid
 
     def get_reports(self) -> List[Header]:
