@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import Body, APIRouter, Path
+from fastapi import Body, APIRouter, Path, UploadFile, File
 from fastapi.responses import FileResponse
 
 from src.repository.configuration import AgentReportRepositoryConfigurator
@@ -25,9 +25,8 @@ async def reports_in_progress() -> List[Header]:
 
 @report_api.patch("/{doc_guid}", name="Добавить фотографии к отчету")
 async def add_photos(
-        doc_guid: str = Path(..., description="GUID черновика отчета", min_length=32, max_length=32)
+        doc_guid: str = Path(..., description="GUID черновика отчета", min_length=32, max_length=32),
+        pictures: List[UploadFile] = File(..., description="Файлы фотографий")
 ) -> FileResponse:
-    """
-    Добавить фотографии к отчету.
-    """
-    return REPOSITORY.add_pictures(doc_guid)
+    """Добавить фотографии к отчету."""
+    return REPOSITORY.add_pictures(doc_guid, pictures)

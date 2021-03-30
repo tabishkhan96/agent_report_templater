@@ -152,8 +152,7 @@ class AgentReportRepository:
 
         doc = self.document_dao(f'{settings.REPOSITORY.REPORTS_DIR}/{filename}')
 
-        for chunk in chunked(images, 4):
-            i: int = 0
+        for images_chunk in chunked(images, 4):
             photos_table = deepcopy(
                 self.document_dao(
                     f"{settings.REPOSITORY.TEMPLATES_DIR}/photos_template.{settings.DOC_TYPE}"
@@ -163,10 +162,9 @@ class AgentReportRepository:
             doc.add_page_break()
             photos_table = doc.get_tables()[-1]
 
-            for row in range(2):
-                for cell in photos_table.row_cells(row):
-                    doc.insert_picture_into_cell(cell, chunk[i])
-                    i += 1
+            cells = [cell for n in range(2) for cell in photos_table.row_cells(n)]
+            for n, image in enumerate(images_chunk):
+                doc.insert_picture_into_cell(cells[n], image)
 
         doc.save(f"{settings.REPOSITORY.REPORTS_DIR}/{filename[33:]}")
         os.remove(f"{settings.REPOSITORY.REPORTS_DIR}/{filename}")
