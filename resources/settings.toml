@@ -1,6 +1,7 @@
 [default]
 
 [development]
+logging = "resources/logging.toml"
 doc_type = 'docx'
 origins = '*'
 service_host = '0.0.0.0'

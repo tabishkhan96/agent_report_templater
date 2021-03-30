@@ -1,0 +1,32 @@
+version = 1
+disable_existing_loggers = false
+
+[formatters]
+    [formatters.standard]
+      format = "%(asctime)s %(levelname)-5s %(name)-15s | %(message)s"
+      datefmt = ""
+    [formatters.brief]
+      format = "%(message)s"
+    [formatters.extended]
+      format = "%(asctime)s [p%(process)d] %(levelname)s [%(filename)s:%(lineno)d] %(message)s"
+      datefmt = ""
+
+[handlers]
+  [handlers.default]
+    class = "logging.StreamHandler"
+    formatter = "standard"
+    level = "INFO"
+  [handlers.file]
+    class = "logging.handlers.RotatingFileHandler"
+    filename = "/var/log/agent_reports/agent_reports.log"
+    formatter = "extended"
+    maxBytes = 2000000
+    backupCount = 10
+    level = "DEBUG"
+    encoding = "utf8"
+
+[root]
+  level = "DEBUG"
+  handlers = ["default", "file"]
+
+[loggers]
