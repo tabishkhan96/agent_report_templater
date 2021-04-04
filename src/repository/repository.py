@@ -152,6 +152,8 @@ class AgentReportRepository:
 
         doc = self.document_dao(f'{settings.REPOSITORY.REPORTS_DIR}/{filename}')
 
+        images = [image.file for image in images]
+
         for images_chunk in chunked(images, 4):
             photos_table = deepcopy(
                 self.document_dao(

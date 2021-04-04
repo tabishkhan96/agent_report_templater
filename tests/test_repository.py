@@ -27,7 +27,13 @@ class TestAgentReportRepository:
         pass
 
     def test_add_pictures(self, repository: AgentReportRepository):
-        images = [f'tests/images/{img}' for img in sorted(os.listdir('tests/images'))]
         with pytest.raises(DraftDocumentNotFound):
             repository.add_pictures(uuid4().hex, [])
-        assert repository.add_pictures(TestDoc.guid, images)
+
+        images_file_objects = [open(f'tests/images/{img}', 'rb') for img in sorted(os.listdir('tests/images'))]
+        assert repository.add_pictures(
+            TestDoc.guid,
+            [UploadFile(filename=f"{i}.jpg", file=img) for i, img in enumerate(images_file_objects)]
+        )
+        for img in images_file_objects:
+            img.close()

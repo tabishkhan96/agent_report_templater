@@ -280,11 +280,10 @@ export default {
     },
     async uploadPhotos () {
       let data = new FormData();
-      for (let i = 0; i < this.picturesList.length; i++) {
-        data.append('id', i.toString());
-        data.append('file', this.picturesList[i].file);
+      for (let i = 0; i < this.picturesList.length; i++ ) {
+         data.append('pictures', this.picturesList[i].file);
       }
-      let config = {header : {'Content-Type' : 'image/png'}}
+      let config = {header : {'Content-Type' : 'multipart/form-data'}, responseType: 'blob'};
       try {
         const res = await axios.patch(`http://0.0.0.0:8080/report/${this.docGuid}`, data, config);
         console.log(res.data);
