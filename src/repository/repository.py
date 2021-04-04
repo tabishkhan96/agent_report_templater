@@ -46,6 +46,12 @@ class AgentReportRepository:
         )
         doc = self.document_dao(f"{settings.REPOSITORY.TEMPLATES_DIR}/report_template.{settings.DOC_TYPE}")
 
+        cargo_in_english: str = (
+                settings.VEGETABLES.get(header_data.cargo.lower(), '') or
+                settings.FRUITS.get(header_data.cargo.lower(), '')
+        )
+        header_data.cargo = f"{header_data.cargo} / {cargo_in_english}"
+
         header: Table = doc.get_tables()[0]
         # распихиваем данные в заголовок отчета
         for cell, text in zip(header.column_cells(1), header_data.dict().values()):
@@ -123,7 +129,7 @@ class AgentReportRepository:
 
         doc_guid: str = uuid.uuid4().hex
         filename: str = f"{doc_guid}_{header_data.report_number}_{header_data.order}_" \
-                        f"{header_data.shipper}_{header_data.cargo}".replace("/", '')
+                        f"{header_data.shipper}_{cargo_in_english}".replace("/", '')
 
         doc.save(f"{settings.REPOSITORY.REPORTS_DIR}/{filename}.{settings.DOC_TYPE}")
         self.logger.info(f"Doc saved to '{settings.REPOSITORY.REPORTS_DIR}/' with GUID {doc_guid}.")
@@ -168,6 +174,12 @@ class AgentReportRepository:
             for n, image in enumerate(images_chunk):
                 doc.insert_picture_into_cell(cells[n], image)
 
-        doc.save(f"{settings.REPOSITORY.REPORTS_DIR}/{filename[33:]}")
+        filename_without_guid: str = filename[33:]
+
+        doc.save(f"{settings.REPOSITORY.REPORTS_DIR}/{filename_without_guid}")
         os.remove(f"{settings.REPOSITORY.REPORTS_DIR}/{filename}")
-        return FileResponse(f"{settings.REPOSITORY.REPORTS_DIR}/{filename[33:]}")
+        return FileResponse(
+            f"{settings.REPOSITORY.REPORTS_DIR}/{filename_without_guid}",
+            filename=filename_without_guid,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
