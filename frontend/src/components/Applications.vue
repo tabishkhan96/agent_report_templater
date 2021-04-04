@@ -120,7 +120,7 @@ export default {
           if (!orders[application.order].BL.includes(application.BL)) {
             orders[application.order].BL = [orders[application.order].BL, application.BL].flat();
           }
-          if (!orders[application.order].containers.includes(application.containers)) {
+          if (!orders[application.order].containers.includes(application.containers[0])) {
             orders[application.order].containers = [orders[application.order].containers, application.containers].flat();
           }
           if (!orders[application.order].vessel.includes(application.vessel)) {
