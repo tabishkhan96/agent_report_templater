@@ -61,11 +61,22 @@
         <br>
         <table style="margin: auto">
           <tr v-for="chunk in picturesListChunked" :key="chunk" class="d-flex">
-            <td @drop='onDrop($event, chunk[0])' @dragover.prevent @dragenter.prevent>
-              <img :src="chunk[0].obj" alt="picture" draggable @dragstart='startDrag($event, chunk[0])'/>
+            <td @drop='onDrop($event, chunk[0])'
+                @dragover.prevent
+                @dragenter.prevent
+                class="picture-cell"
+            >
+              <img :src="chunk[0].obj" alt="picture" draggable @dragstart='startDrag($event, chunk[0])'/><br>
+              <span class="deletebtn" @click="picturesList.splice(chunk[0].id, 1)" style="color: black">&times;</span>
             </td>
-            <td @drop='onDrop($event, chunk[1])' @dragover.prevent @dragenter.prevent>
-              <img v-if="chunk[1]" :src="chunk[1].obj" alt="picture" draggable @dragstart='startDrag($event, chunk[1])'/>
+            <td v-if="chunk[1]"
+                @drop='onDrop($event, chunk[1])'
+                @dragover.prevent
+                @dragenter.prevent
+                class="picture-cell"
+            >
+              <img :src="chunk[1].obj" alt="picture" draggable @dragstart='startDrag($event, chunk[1])'/><br>
+              <span class="deletebtn" @click="picturesList.splice(chunk[1].id, 1)">&times;</span>
             </td>
           </tr>
         </table>
@@ -307,8 +318,23 @@ export default {
     transition: 0.3s;
   }
 
+  .deletebtn {
+    margin-left: 15px;
+    color: black;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
   /* When moving the mouse over the close button */
   .closebtn:hover {
     color: black;
+  }
+
+  .picture-cell {
+    padding: 5px;
+    box-shadow: 0 0 9px 0 rgba(0,0,0,0.1);
+    border-radius: 3px;
   }
 </style>
