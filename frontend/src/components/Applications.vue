@@ -80,7 +80,7 @@
             </td>
           </tr>
         </table>
-        <button v-if="photosSet" @click="picturesList.reverse();recountPictureList" class="btn" style="margin: 15px">
+        <button v-if="photosSet" @click="picturesList.reverse();recountPictureList()" class="btn" style="margin: 15px">
           Обратный порядок
         </button>
         <button v-if="photosSet" @click="uploadPhotos" class="btn btn-success">Отправить</button>
