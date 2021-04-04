@@ -7,15 +7,16 @@
         <br>
         <div v-if="message" class="alert">{{ message }}<span class="closebtn" @click="message=''">&times;</span></div>
         <br>
-<!--        Найти <input placeholder="..." @input="filterBySubstring($event.target.value)">-->
         <label> Место проведения инспекции <input v-model.lazy="placeOfInspection" size="50"/></label><br>
         <label> Номер отчета <input v-model.lazy="reportNumber"/></label>
         <br>
-        <input type="file" ref="file" style="display: none" @change="addApplicationFile">
+        <input type="file"
+               ref="file"
+               accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+               style="display: none"
+               @change="addApplicationFile"
+        >
         <button @click="$refs.file.click()" class="btn btn-success">Выберите файл заявки...</button>
-
-<!--        <input style="display:none" id="applicationFile" type="file" @change="getApplicationsFromFile(this.value)"/>-->
-<!--        <button type="button" class="btn btn-success" @click="chooseApplicationFile">-->
         <br>
         <br>
         <table class="table table-hover">
@@ -53,7 +54,7 @@
           </tbody>
         </table>
         <br>
-        <input type="file" multiple ref="pictures" style="display: none" @change="getPicturesFromField">
+        <input type="file" multiple ref="pictures" accept="image/jpg,image/jpeg,image/png" style="display: none" @change="getPicturesFromField">
         <button v-if="orderSelected" @click="$refs.pictures.click()" class="btn btn-success" style="margin: 15px">
           Выберите фотографии...
         </button>
@@ -92,7 +93,9 @@ export default {
       photosSet: false,
       docGuid: '',
       message: '',
-      picturesList: []
+      picturesList: [],
+      pictureTypes: ['image/jpg','image/jpeg','image/png'],
+      docReceived: false
     };
   },
   computed: {
@@ -221,6 +224,13 @@ export default {
     },
     getPicturesFromField(event) {
       let files = event.target.files;
+      for (let i=0; i<files.length;i++) {
+        if (!this.pictureTypes.includes(files[i].type)) {
+          this.message = `Неверный формат ${i+1} фотографии!`;
+          return
+        }
+      }
+      this.message = '';
       this.photosSet = true;
       this.setIDsForPictures(files);
     },
