@@ -307,8 +307,15 @@ export default {
       }
       let config = {header : {'Content-Type' : 'multipart/form-data'}, responseType: 'blob'};
       try {
-        const res = await axios.patch(`http://0.0.0.0:8080/report/${this.docGuid}`, data, config);
-        console.log(res.data);
+        let res = await axios.patch(`http://0.0.0.0:8080/report/${this.docGuid}`, data, config);
+        let blob = new Blob([res.data], {type: res.headers["content-type"]});
+        let fileName = res.headers["content-disposition"].split("filename*=utf-8''")[1];
+        let link = this.$refs['getAgain'];
+        link.href = window.URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+        this.photosSet = false;
+        this.docReceived = true;
       } catch (error) {
         this.message = "Не удалось добавить фотографии!";
         // eslint-disable-next-line

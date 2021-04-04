@@ -36,7 +36,8 @@ app.add_middleware(
     allow_origins=[settings.ORIGINS or "*"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
+    expose_headers=["Content-Disposition"]
 )
 
 uvicorn.run(app=app, host=settings.SERVICE_HOST, port=settings.SERVICE_PORT)
