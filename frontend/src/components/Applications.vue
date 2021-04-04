@@ -270,10 +270,10 @@ export default {
       const image = this.picturesList.find(img => img.id === imageID)
       image.id = targetID;
       if (targetID > imageID) {
-        this.picturesList.splice(targetID, 0, image);
+        this.picturesList.splice(targetID+1, 0, image);
         this.picturesList.splice(imageID, 1);
       } else if (targetID < imageID) {
-        this.picturesList.splice(targetID, 0, image);
+        this.picturesList.splice(targetID+1, 0, image);
         this.picturesList.splice(imageID+1, 1);
       }
       this.recountPictureList();
