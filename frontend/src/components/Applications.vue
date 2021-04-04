@@ -83,7 +83,18 @@
         <button v-if="photosSet" @click="picturesList.reverse();recountPictureList()" class="btn" style="margin: 15px">
           Обратный порядок
         </button>
-        <button v-if="photosSet" @click="uploadPhotos" class="btn btn-success">Отправить</button>
+        <button v-if="photosSet" @click="deleteAll" class="btn" style="margin: 15px">
+          Удалить все
+        </button>
+        <br>
+        <button v-if="photosSet && !docReceived" @click="uploadPhotos" class="btn btn-success">
+          Отправить
+        </button>
+        <br>
+        <a ref="getAgain"></a>
+        <button v-if="docReceived" @click="$refs.getAgain.click()" class="btn btn-success" style="margin: 15px">
+          Скачать повторно
+        </button>
       </div>
     </div>
   </div>
@@ -180,8 +191,7 @@ export default {
       this.getApplicationsFromFile(file, this.convertFieldsFromRussianToEnglish);
     },
     async getApplicationsFromFile(file, callback) {
-      this.orderSelected = false;
-      this.photosSet = false;
+      this.cleanGlobalVariables();
       let reader = new FileReader();
       reader.readAsArrayBuffer(file);
       reader.onload = async function () {
@@ -189,6 +199,12 @@ export default {
         let workbook = XLSX.read(data, {type: 'array', cellDates: true});
         callback(XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]));
       };
+    },
+    cleanGlobalVariables() {
+      this.orderSelected = false;
+      this.photosSet = false;
+      this.picturesList = [];
+      this.docReceived = false;
     },
     convertFieldsFromRussianToEnglish (jsonList) {
       this.applicationsList = jsonList.map(o => ({
@@ -226,6 +242,7 @@ export default {
       try {
         const res = await axios.put('http://0.0.0.0:8080/report/', order);
         this.orderSelected = true;
+        this.message = '';
         this.docGuid = res.data;
       } catch (error) {
         this.message = "Не удалось создать документ!";
@@ -257,6 +274,11 @@ export default {
     recountPictureList() {
       for (let i = 0; i < this.picturesList.length; i++) {
         this.picturesList[i].id = i;
+      }
+    },
+    deleteAll() {
+      if (confirm("Удалить все фотографии?")) {
+        this.picturesList = [];
       }
     },
     startDrag: (event, image) => {
