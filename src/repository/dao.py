@@ -40,6 +40,10 @@ class DocumentDAOInterface(ABC):
         """Add Table to the end of Doc"""
 
     @abstractmethod
+    def get_paragraphs(self) -> List:
+        """Get list of paragraphs"""
+
+    @abstractmethod
     def append_paragraph(self, paragraph: Union[str, Any]):
         """Add text paragraph to the end of Doc"""
 
@@ -92,6 +96,10 @@ class DocxDocumentDAO(DocumentDAOInterface):
         tbl = table._tbl
         paragraph = self._document.add_paragraph()
         paragraph._p.addnext(tbl)
+
+    def get_paragraphs(self) -> List:
+        """"Get list of paragraphs"""
+        return self._document.paragraphs
 
     def append_paragraph(self, paragraph: Union[str, Any]):
         return self._document.add_paragraph(text=paragraph)
