@@ -8,7 +8,11 @@
         <div v-if="message" class="alert">{{ message }}<span class="closebtn" @click="message=''">&times;</span></div>
         <br>
         <label> Место проведения инспекции <input v-model.lazy="placeOfInspection" size="50"/></label><br>
-        <label> Номер отчета <input v-model.lazy="reportNumber"/></label>
+        <label> Номер отчета <input v-model.lazy="reportNumber"/></label><br>
+        <label> Дата инспекции
+          <input type="date" v-model.lazy="inspectionDateRow"/> &nbsp;
+          <label v-if="inspectionDateRow"> добавить следующий день: <input type="checkbox" v-model="twoDaysInspection"/> </label>
+        </label>
         <br>
         <input type="file"
                ref="file"
@@ -72,6 +76,8 @@ export default {
       applicationsList: [],
       placeOfInspection: 'РЦ Альфа Центавра / RC Alpha Centauri',
       reportNumber: 'IL-NS-0',
+      inspectionDateRow: '',
+      twoDaysInspection: false,
       orderSelected: false,
       docGuid: '',
       message: ''
@@ -93,9 +99,6 @@ export default {
           }
           if (!orders[application.order].containers.includes(application.containers[0])) {
             orders[application.order].containers = [orders[application.order].containers, application.containers].flat();
-          }
-          if (!orders[application.order].vessel.includes(application.vessel)) {
-            orders[application.order].vessel = [orders[application.order].vessel, application.vessel].flat();
           }
           if (!orders[application.order].cargo.includes(application.cargo)) {
             orders[application.order].cargo = [orders[application.order].cargo, application.cargo].flat();
@@ -137,6 +140,19 @@ export default {
       });
       return orders;
     },
+    inspectionDate () {
+      let date = '';
+      if (this.inspectionDateRow) {
+        date = new Date(this.inspectionDateRow);
+        date = date.toLocaleDateString();
+      }
+      if (this.twoDaysInspection) {
+        let secondDay = new Date(this.inspectionDateRow);
+        secondDay.setDate(secondDay.getDate() + 1);
+        date += ` - ${secondDay.toLocaleDateString()}`;
+      }
+      return date;
+    },
     picturesListChunked() {
       let result = [];
       for (let i = 0; i < this.picturesList.length; i += 2) {
@@ -171,6 +187,7 @@ export default {
           order: o["заказ"],
           report_number: this.reportNumber,
           place_of_inspection: this.placeOfInspection,
+          inspection_date: this.inspectionDate,
           supplier: o["поставщик"] || "",
           BL: o["коносамент"].toString() || "",
           containers: [o["контейнер"]] || [],
