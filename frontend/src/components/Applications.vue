@@ -151,7 +151,7 @@ export default {
       this.getApplicationsFromFile(file, this.convertFieldsFromRussianToEnglish);
     },
     async getApplicationsFromFile(file, callback) {
-      this.cleanGlobalVariables();
+      this.resetGlobalVariables();
       let reader = new FileReader();
       reader.readAsArrayBuffer(file);
       reader.onload = async function () {
@@ -160,7 +160,7 @@ export default {
         callback(XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]));
       };
     },
-    cleanGlobalVariables() {
+    resetGlobalVariables() {
       this.orderSelected = false;
       this.photosSet = false;
       this.picturesList = [];
