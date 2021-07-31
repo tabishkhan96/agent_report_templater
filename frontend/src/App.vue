@@ -1,14 +1,14 @@
 <template>
-  <Applications/>
+  <Main/>
 </template>
 
 <script>
-import Applications from './components/Applications.vue'
+import Main from './components/Main.vue'
 
 export default {
   name: 'App',
   components: {
-    Applications
+    Main
   }
 }
 </script>
