@@ -31,7 +31,12 @@
             :inspection-date="inspectionDate"
             @applicationsSelectedEvent="beginMakingReport"
         ></ImportApplicationsTable>
-        <button v-if="applicationsSelected" @click="createReportForOrder" class="btn btn-success">Создать текстовую часть отчета</button>
+        <ThermographsData
+            v-if="applicationsSelected"
+            :report="report"
+            @ThermalDataInsertedEvent="toPalletsData"
+        ></ThermographsData>
+        <button v-if="textFinished" @click="createReportForOrder" class="btn btn-success">Создать текстовую часть отчета</button>
         <Gallery v-if="attachPhotos" :doc-guid="docGuid"></Gallery>
       </div>
     </div>
@@ -43,6 +48,7 @@ import axios from 'axios';
 import XLSX from 'xlsx';
 import Gallery from './Gallery.vue';
 import ImportApplicationsTable from "./ImportApplicationsTable";
+import ThermographsData from "./ThermographsData";
 
 export default {
   data() {
@@ -63,7 +69,8 @@ export default {
   },
   components: {
     Gallery,
-    ImportApplicationsTable
+    ImportApplicationsTable,
+    ThermographsData,
   },
   computed: {
     inspectionDate () {
