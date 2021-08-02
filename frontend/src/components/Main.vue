@@ -29,7 +29,7 @@
             :report-number="reportNumber"
             :place-of-inspection="placeOfInspection"
             :inspection-date="inspectionDate"
-            @applicationsSelectedEvent="beginMakingReport"
+            @ApplicationsSelectedEvent="toThermalData"
         ></ImportApplicationsTable>
         <ThermographsData
             v-if="applicationsSelected"
@@ -61,6 +61,7 @@ export default {
       importApplication: false,
       showTable: true,
       applicationsSelected: false,
+      textFinished: false,
       attachPhotos: false,
       report: {},
       docGuid: '',
@@ -119,9 +120,12 @@ export default {
       this.importApplication = false;
       this.showTable = true;
       this.applicationsSelected = false;
+      this.textFinished = false;
     },
-    beginMakingReport(reportObj) {
+    toThermalData(reportObj) {
+      console.log(reportObj);
       this.showTable = false;
+      this.applicationsSelected = true;
       this.report = reportObj;
     },
     async createReportForOrder(orderNumber) {
