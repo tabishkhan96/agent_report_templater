@@ -26,14 +26,10 @@
         <ImportApplicationsTable
             v-if="importApplication && showTable"
             :applications-json-list="applicationsList"
-            :report-number="reportNumber"
-            :place-of-inspection="placeOfInspection"
-            :inspection-date="inspectionDate"
             @ApplicationsSelectedEvent="toThermalData"
         ></ImportApplicationsTable>
         <ThermographsData
             v-if="applicationsSelected"
-            :report="report"
             @ThermalDataInsertedEvent="toPalletsData"
         ></ThermographsData>
         <button v-if="textFinished" @click="createReportForOrder" class="btn btn-success">Создать текстовую часть отчета</button>
@@ -61,9 +57,9 @@ export default {
       importApplication: false,
       showTable: true,
       applicationsSelected: false,
+      thermalDataSet: false,
       textFinished: false,
       attachPhotos: false,
-      report: {},
       docGuid: '',
       message: ''
     };
@@ -129,7 +125,6 @@ export default {
     resetGlobalVariables() {
       this.attachPhotos = false;
       this.photosSet = false;
-      this.picturesList = [];
       this.docReceived = false;
       this.importApplication = false;
       this.showTable = true;
