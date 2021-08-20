@@ -60,8 +60,13 @@
 export default {
   data() {
     return {
-      tableHeadersList: ['', 'ТЕ', 'Заказ',	'Поставщики',	'Коносаменты',	'Суда',	'Грузы',	'Карточки',	'Сорта',	'Ед.',	'Инвойсы',	'Примерная дата',	'Калибры',	'Терминалы',	'Экспедиторы'],
-      applicationsList: this.convertFieldsFromRussianToEnglish(this.applicationsJsonList)
+      tableHeadersList: [
+          '', 'ТЕ', 'Заказ',	'Поставщики',	'Коносаменты',	'Суда',	'Грузы',	'Карточки',	'Сорта',  'Ед.',	'Инвойсы',
+        'Примерная дата',	'Калибры',	'Терминалы',	'Экспедиторы'
+      ],
+      applicationsList: this.convertFieldsFromRussianToEnglish(this.applicationsJsonList),
+      report: this.$store.state.report,
+      transportUnitModel: this.$store.state.transportUnit
     };
   },
   props: ["applicationsJsonList"],
@@ -99,62 +104,49 @@ export default {
       this.$emit('ApplicationsSelectedEvent');
     },
     continueReport() {
-      let report = null;
-      this.applicationsList.forEach(function (application) {
-        if (application.selected) {
-          if (report) {
-            if (report.order !== application.order) {
-              return;
-            }
-            if (!report.vessel.includes(application.vessel)) {
-              report.vessel = [report.vessel, application.vessel].flat();
-            }
-            let unitIndex;
-            // eslint-disable-next-line no-unused-vars
-            if (report.transport_units.some(function (element, index, array) {
-              unitIndex = index;
-              return element.number === application.transport_unit;
-            })) {
-              report.transport_units[unitIndex].cargo.push(application.cargo);
-              report.transport_units[unitIndex].card.push(application.card);
-              report.transport_units[unitIndex].cultivar.push(application.cultivar);
-              report.transport_units[unitIndex].units.push(application.units);
-            } else {
-              report.transport_units.push({
-                number: application.transport_unit,
-                supplier: application.supplier,
-                cargo: [application.cargo],
-                card: [application.card],
-                cultivar: [application.cultivar],
-                units: [application.units],
-                invoice: application.invoice,
-                date: application.date,
-                calibre: [application.calibre],
-              });
-            }
-          } else {
-            report = {
-              order: application.order,
-              report_number: application.report_number,
-              place_of_inspection: application.place_of_inspection,
-              inspection_date: application.inspection_date,
-              vessel: application.vessel,
-              transport_units: [{
-                number: application.transport_unit,
-                supplier: application.supplier,
-                cargo: [application.cargo],
-                card: application.card,
-                cultivar: application.cultivar,
-                units: application.units,
-                invoice: application.invoice,
-                date: application.date,
-                calibre: application.calibre,
-              }]
-            };
-          }
+      let report = this.report;
+      let transportUnit = this.transportUnitModel;
+      let selectedApplications = this.applicationsList.filter(a => a.selected);
+      report.order = selectedApplications[0].order;
+      report.vessel = selectedApplications[0].vessel;
+      selectedApplications.forEach(function (application) {
+        if (report.order && report.order !== application.order) {
+          throw 'Выбраны ТЕ с разными заказами.'
+        }
+        if (!report.vessel.includes(application.vessel)) {
+          report.vessel = [report.vessel, application.vessel].flat();
+        }
+
+        let unitIndex;
+        if (report.transport_units.some(function (element, index) {
+                unitIndex = index;
+                return element.number === application.transport_unit;
+        })) {
+          report.transport_units[unitIndex].cargo.push(application.cargo);
+          report.transport_units[unitIndex].card.push(application.card);
+          report.transport_units[unitIndex].cultivar.push(application.cultivar);
+          report.transport_units[unitIndex].units.push(application.units);
+        } else {
+          report.transport_units.push(
+              Object.assign(
+                  Object.assign({}, transportUnit), {
+                      number: application.transport_unit,
+                      supplier: application.supplier,
+                      cargo: [application.cargo],
+                      card: [application.card],
+                      cultivar: [application.cultivar],
+                      units: [application.units],
+                      invoice: application.invoice,
+                      date: application.date,
+                      calibre: [application.calibre]
+                  }
+              )
+          )
         }
       });
-      this.$emit('applicationsSelectedEvent', report);
+      console.log(report);
+      this.report = report;
+      this.saveReport();
     },
   },
 };
