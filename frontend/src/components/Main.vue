@@ -87,6 +87,13 @@ export default {
       }
       return date;
     },
+    report () {
+      let report = this.$store.state.report;
+      report.place_of_inspection = this.placeOfInspection;
+      report.report_number = this.reportNumber;
+      report.inspection_date = this.inspectionDate;
+      return report
+    }
   },
   methods: {
     addApplicationFile(event) {
@@ -111,6 +118,13 @@ export default {
       if (jsonList[0]["контейнер"] || jsonList[0]["Контейнер"]) {
         this.importApplication = true;
       }
+      this.saveReport();
+    },
+    saveReport() {
+      this.$store.commit('setReport', this.report)
+    },
+    dropReport() {
+      this.$store.commit('dropReport')
     },
     resetGlobalVariables() {
       this.attachPhotos = false;
@@ -121,6 +135,8 @@ export default {
       this.showTable = true;
       this.applicationsSelected = false;
       this.textFinished = false;
+      this.thermalDataSet = false;
+      this.dropReport();
     },
     toThermalData(reportObj) {
       console.log(reportObj);

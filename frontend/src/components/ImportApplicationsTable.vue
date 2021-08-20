@@ -70,11 +70,8 @@ export default {
       return jsonList.map(o => ({
           id: jsonList.indexOf(o),
           selected: false,
-          order: o["заказ"],
-          report_number: this.reportNumber,
-          place_of_inspection: this.placeOfInspection,
-          inspection_date: this.inspectionDate,
-          supplier: o["поставщик"] || "",
+          order: o["заказ"] || o["Заказ"],
+          supplier: o["поставщик"] || o["Поставщик"] || "",
           BL: o["коносамент"].toString() || "",
           transport_unit: o["контейнер"] || "",
           vessel: o["судно"] || "",
@@ -90,6 +87,10 @@ export default {
           organization: o["Организация"] || "",
           remark: o["примечание"] || "",
         }));
+    },
+    saveReport() {
+      this.$store.commit('setReport', this.report);
+      this.$emit('ApplicationsSelectedEvent');
     },
     continueReport() {
       let report = null;

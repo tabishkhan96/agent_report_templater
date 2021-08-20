@@ -65,8 +65,8 @@ export default {
   data() {
     return {
       tableHeadersList: ['ТЕ', 'Рекомендованная темп.',	'Пульпа мин.',	'Пульпа макс.',	'Кол-во термографов',	'Состояние'],
-      applicationsList: []
-    };
+      report: this.$store.state.report,
+    }
   },
   props: ["report",],
   emits: ["ThermalDataInsertedEvent"],
