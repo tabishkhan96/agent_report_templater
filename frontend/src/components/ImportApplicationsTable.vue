@@ -45,6 +45,7 @@
         </table>
         <br>
         <button
+            v-if="hasSelected"
             @click="continueReport"
             class="btn btn-success">
           Составить отчет для выбранных ТЕ
@@ -63,8 +64,13 @@ export default {
       applicationsList: this.convertFieldsFromRussianToEnglish(this.applicationsJsonList)
     };
   },
-  props: ["applicationsJsonList", "reportNumber", "placeOfInspection", "inspectionDate"],
-  emits: ["applicationsSelectedEvent"],
+  props: ["applicationsJsonList"],
+  emits: ["ApplicationsSelectedEvent"],
+  computed: {
+    hasSelected() {
+      return this.applicationsList.some(function (element) {return element.selected})
+    }
+  },
   methods: {
     convertFieldsFromRussianToEnglish (jsonList) {
       return jsonList.map(o => ({
