@@ -45,7 +45,7 @@
         </table>
         <br>
         <button
-            v-if="hasSelected"
+            v-if="hasSelected && showSubmitButton"
             @click="continueReport"
             class="btn btn-success">
           Составить отчет для выбранных ТЕ
@@ -153,7 +153,8 @@ export default {
           )
         }
       });
-      console.log(report);
+      this.applicationsList = this.applicationsList.filter(a => a.selected);
+      this.showSubmitButton = false;
       this.report = report;
       this.saveReport();
     },
