@@ -66,6 +66,8 @@ export default {
     return {
       tableHeadersList: ['ТЕ', 'Рекомендованная темп.',	'Пульпа мин.',	'Пульпа макс.',	'Кол-во термографов',	'Состояние'],
       report: this.$store.state.report,
+      thermographDataModel: this.$store.state.thermographDataModel,
+      editable: true
     }
   },
   props: ["report",],

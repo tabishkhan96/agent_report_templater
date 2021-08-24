@@ -66,7 +66,10 @@ export default {
       ],
       applicationsList: this.convertFieldsFromRussianToEnglish(this.applicationsJsonList),
       report: this.$store.state.report,
-      transportUnitModel: this.$store.state.transportUnit
+      transportUnitModel: this.$store.state.transportUnitModel,
+      temperatureDataModel: this.$store.state.temperatureDataModel,
+      pulpDataModel: this.$store.state.pulpDataModel,
+      showSubmitButton: true,
     };
   },
   props: ["applicationsJsonList"],
@@ -106,6 +109,8 @@ export default {
     continueReport() {
       let report = this.report;
       let transportUnit = this.transportUnitModel;
+      let temperatureDataModel = this.temperatureDataModel;
+      let pulpDataModel = this.pulpDataModel;
       let selectedApplications = this.applicationsList.filter(a => a.selected);
       report.order = selectedApplications[0].order;
       report.vessel = selectedApplications[0].vessel;
@@ -127,18 +132,22 @@ export default {
           report.transport_units[unitIndex].cultivar.push(application.cultivar);
           report.transport_units[unitIndex].units.push(application.units);
         } else {
+          let temperatureData = Object.assign({}, temperatureDataModel);
+          temperatureData.pulp = Object.assign({}, pulpDataModel);
           report.transport_units.push(
               Object.assign(
                   Object.assign({}, transportUnit), {
                       number: application.transport_unit,
                       supplier: application.supplier,
+                      BL: application.BL,
                       cargo: [application.cargo],
                       card: [application.card],
                       cultivar: [application.cultivar],
                       units: [application.units],
                       invoice: application.invoice,
                       date: application.date,
-                      calibre: [application.calibre]
+                      calibre: [application.calibre],
+                      temperature: temperatureData
                   }
               )
           )
