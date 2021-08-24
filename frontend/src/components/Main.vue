@@ -156,10 +156,11 @@ export default {
       let report = this.report;
       console.log(report);
       try {
-        const res = await axios.put('http://0.0.0.0:8080/report/', order);
+        const res = await axios.put('http://0.0.0.0:8080/report/', report);
         this.attachPhotos = true;
         this.message = '';
         this.docGuid = res.data;
+        this.scrollToBottom();
       } catch (error) {
         this.message = "Не удалось создать документ!";
         // eslint-disable-next-line
