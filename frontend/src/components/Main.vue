@@ -32,7 +32,13 @@
             v-if="applicationsSelected"
             @ThermalDataInsertedEvent="toPalletsData"
         ></ThermographsData>
-        <button v-if="textFinished" @click="createReportForOrder" class="btn btn-success">Создать текстовую часть отчета</button>
+        <PalletsData
+          v-if="thermalDataSet"
+          @PalletDataInsertedEvent="textFinished=true;"
+        ></PalletsData>
+        <br>
+        <button v-if="textFinished" @click="createReport" class="btn btn-success">Создать текстовую часть отчета</button>
+        <br>
         <Gallery v-if="attachPhotos" :doc-guid="docGuid"></Gallery>
       </div>
     </div>
@@ -45,6 +51,7 @@ import XLSX from 'xlsx';
 import Gallery from './Gallery.vue';
 import ImportApplicationsTable from "./ImportApplicationsTable";
 import ThermographsData from "./ThermographsData";
+import PalletsData from "./PalletsData";
 
 export default {
   data() {
@@ -68,6 +75,7 @@ export default {
     Gallery,
     ImportApplicationsTable,
     ThermographsData,
+    PalletsData,
   },
   computed: {
     inspectionDate () {
@@ -133,15 +141,20 @@ export default {
       this.thermalDataSet = false;
       this.dropReport();
     },
-    toThermalData(reportObj) {
-      console.log(reportObj);
-      this.showTable = false;
+    toThermalData() {
       this.applicationsSelected = true;
-      this.report = reportObj;
+      this.scrollToBottom()
     },
-    async createReportForOrder(orderNumber) {
-      this.applicationsList = this.applicationsList.filter(application => application.order === orderNumber);
-      let order = this.orders[orderNumber];
+    toPalletsData() {
+      this.thermalDataSet = true;
+      this.scrollToBottom()
+    },
+    scrollToBottom() {
+      setTimeout(window.scrollTo, 100, 0, document.body.scrollHeight);
+    },
+    async createReport() {
+      let report = this.report;
+      console.log(report);
       try {
         const res = await axios.put('http://0.0.0.0:8080/report/', order);
         this.attachPhotos = true;
