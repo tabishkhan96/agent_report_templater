@@ -38,10 +38,10 @@
                   <td class="col-2">
                     <ul>
                       <li v-for="(thermograph, index) in unit.temperature.thermographs" :key="index">
-                        {{ index+1 }} термограф: <select required v-model.lazy="thermograph.malfunction">
-                          <option value="yes">Работал</option>
-                          <option value="did not work">Не работал</option>
-                          <option value="did not work correctly">Работал некорректно</option>
+                        {{ index+1 }} термограф: <select required v-model.lazy="thermograph.worked">
+                          <option value="Да/Yes">Работал</option>
+                          <option value="Не работал/Did not work">Не работал</option>
+                          <option value="Работал некорректно/Did not work correctly">Работал некорректно</option>
                         </select>
                       </li>
                     </ul>

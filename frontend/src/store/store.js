@@ -41,7 +41,7 @@ const store = createStore({
       },
       thermographDataModel: {
         graph: null,
-        malfunction: '',
+        worked: '',
         min: 0.0,
         max: 0.0
       },
