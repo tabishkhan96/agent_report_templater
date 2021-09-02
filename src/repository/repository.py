@@ -11,7 +11,24 @@ from more_itertools import chunked
 
 from src.repository.dao import DocumentDAOInterface
 from src.repository.exceptions import DraftDocumentNotFound
-from src.repository.models import Application, Header, Table, Row
+from src.repository.models import (
+    Table, Row, BaseReport, ImportReport, SelfImportReport, PickupFromSupplierReport
+)
+
+
+# TODO
+# selection restrictions: different orders so on
+# таблицы цветности - после таблиы результатов
+# поворот картинок-  альбомная ориентация и растягивание
+# как составлять таблицы с паллетами/коробками. отличия для разных типов СО
+# логика тальманского отчета. заполнение
+# отличия таблиц температуры для разных СО
+
+# picture cropping
+
+
+# TODO растягивать фото если оно меньше чем ячейка и переворачивать вертикальные
+# если разные грузы в контейнере то в заявке будут разные строки
 
 
 class AgentReportRepository:
@@ -21,7 +38,7 @@ class AgentReportRepository:
         self.logger: logging.Logger = logging.getLogger("repository")
         self.document_dao: Type[DocumentDAOInterface] = document_dao
 
-    def create_report(self, application: Application) -> str:
+    def create_report(self, report: BaseReport) -> str:
         """
         Метод создания черновика отчета.
 
@@ -135,7 +152,7 @@ class AgentReportRepository:
         self.logger.info(f"Doc saved to '{settings.REPOSITORY.REPORTS_DIR}/' with GUID {doc_guid}.")
         return doc_guid
 
-    def get_reports(self) -> List[Header]:
+    def get_reports(self) -> List[BaseReport]:
         raise NotImplemented
 
     def add_pictures(self, doc_guid: str, images: List[UploadFile]) -> FileResponse:

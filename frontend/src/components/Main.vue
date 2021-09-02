@@ -94,7 +94,7 @@ export default {
     report () {
       let report = this.$store.state.report;
       report.place_of_inspection = this.placeOfInspection;
-      report.report_number = this.reportNumber;
+      report.number = this.reportNumber;
       report.inspection_date = this.inspectionDate;
       return report
     }

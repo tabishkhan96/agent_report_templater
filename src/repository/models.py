@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from datetime import date
-from typing import List, Union
+from typing import List, Optional
 from pydantic import BaseModel, validator
+from fastapi import UploadFile
 
 
 class Cell(ABC):
@@ -35,38 +36,130 @@ class Table(ABC):
         ...
 
 
-class Application(BaseModel):
-    """Заявка"""
+class ThermometerBoundaries(BaseModel):
+    min: float = 0.0
+    max: float = 0.0
+
+
+class ThermographData(ThermometerBoundaries):
+    graph: UploadFile
+    worked: str
+
+
+class TemperatureData(BaseModel):
+    pulp: ThermometerBoundaries
+    thermographs: List[ThermographData]
+    recommended: float = 0.0
+
+
+class TransportUnit(BaseModel):
+    number: str
+    supplier: str
+    cargo: List[str]
+    cargo_in_english: List[str] = []
+    card: List[str]
+    cultivar: List[str]
+    units: List[str]
+    invoice: str
+    date: date
+    calibre: List[str]
+    temperature: TemperatureData
+    pallets: int = 0
+    damaged_pallets: int = 0
+    boxes: int = 0
+    damaged_boxes: int = 0
+    cargo_damage: float = 0
+    empty_boxes: int = 0
+    not_full_boxes: int = 0
+
+    @validator("cargo", allow_reuse=True)
+    def strip_cargo(cls, value: str):
+        return value.strip()
+
+
+class Container(TransportUnit):
+    BL: str
+
+
+class Truck(TransportUnit):
+    CMR: str
+
+
+class SuppliersTransportUnit(TransportUnit):
+    distribution_center_receiver: str
+    card: Optional[str] = None
+    cultivar: Optional[str] = None
+    invoice: Optional[str] = None
+    calibre: Optional[str] = None
+
+
+class BaseReport(BaseModel):
+    """Данные для отчета"""
     place_of_inspection: str
-    report_number: str
+    number: str
     order: str
-    supplier: Union[List[str], str]
-    BL: Union[List[str], str]
-    containers: Union[List[str], str]
-    vessel: Union[List[str], str]
-    cargo: str
-    card: Union[List[str], str]
-    cultivar: Union[List[str], str]
-    units: Union[List[str], str]
-    invoice: Union[List[str], str]
-    date: Union[List[date], date]
-    calibre: Union[List[str], str]
-    terminal: Union[List[str], str]
-    expeditor: Union[List[str], str]
-    organization: Union[List[str], str]
-    remark: Union[List[str], str]
+    inspection_date: str
+    transport_units: List[TransportUnit]
 
-    @validator("date", pre=True)
-    def get_date(cls, value: Union[int, List[int]]):
-        """Transform timestamp to datetime object"""
-        if isinstance(value, list):
-            return [date.fromtimestamp(date_object/1000) for date_object in value]
-        return date.fromtimestamp(value/1000)
+    def as_header(self) -> dict:
+        """Data representation for Report's Header"""
+
+    def transport_units_numbers(self) -> List[str]:
+        return [unit.number for unit in self.transport_units]
 
 
-class BillOfLading(BaseModel):
-    """Коносамент"""
+class ImportReport(BaseReport):
+    """Данные для отчета по импорту"""
+    vessel: str
+    transport_units: List[Container]
 
+    def as_header(self) -> dict:
+        return {
+            'report_number': self.number,
+            'place_of_inspection': self.place_of_inspection,
+            'inspection_date': self.inspection_date,
+            'shipper': [unit.supplier for unit in self.transport_units],
+            'cargo': [f'{unit.cargo} / {unit.cargo_in_english}' for unit in self.transport_units],
+            'transport_units': [unit.number for unit in self.transport_units],
+            'vessel': self.vessel,
+            'invoice': [unit.invoice for unit in self.transport_units],
+            'order': self.order,
+            'BL': [unit.BL for unit in self.transport_units],
+        }
+
+
+class SelfImportReport(BaseReport):
+    transport_units: List[Truck]
+
+    def as_header(self) -> dict:
+        return {
+            'report_number': self.number,
+            'place_of_inspection': self.place_of_inspection,
+            'inspection_date': self.inspection_date,
+            'shipper': [unit.supplier for unit in self.transport_units],
+            'cargo': [f'{unit.cargo} / {unit.cargo_in_english}' for unit in self.transport_units],
+            'transport_units': [unit.number for unit in self.transport_units],
+            'invoice': [unit.invoice for unit in self.transport_units],
+            'order': self.order,
+            'CMR': [unit.CMR for unit in self.transport_units],
+        }
+
+
+class PickupFromSupplierReport(BaseReport):
+    transport_units: List[SuppliersTransportUnit]
+
+    def as_header(self) -> dict:
+        return {
+            'report_number': self.number,
+            'cargo': [f'{unit.cargo} / {unit.cargo_in_english}' for unit in self.transport_units],
+            'transport_units': [unit.number for unit in self.transport_units],
+            'order': self.order,
+            'shipper': [unit.supplier for unit in self.transport_units],
+            'inspection_date': self.inspection_date,
+            'discharge_date': [unit.date for unit in self.transport_units],
+            'place_of_inspection': self.place_of_inspection,
+            'distribution_center_receiver': [unit.distribution_center_receiver for unit in self.transport_units]
+        }
 
 class Header(BaseModel):
     """Модель заголовка отчета"""

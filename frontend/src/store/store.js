@@ -5,7 +5,7 @@ const store = createStore({
     return {
       report: {
         order: '',
-        report_number: '',
+        number: '',
         place_of_inspection: '',
         inspection_date: '',
         vessel: '',
@@ -54,7 +54,7 @@ const store = createStore({
     dropReport (state) {
       state.report = {
         order: '',
-        report_number: '',
+        number: '',
         place_of_inspection: '',
         inspection_date: '',
         vessel: '',
