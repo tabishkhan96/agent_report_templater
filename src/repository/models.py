@@ -108,7 +108,7 @@ class BaseReport(BaseModel):
         return [unit.number for unit in self.transport_units]
 
 
-class ImportReport(BaseReport):
+class SelfImportReport(BaseReport):
     """Данные для отчета по импорту"""
     vessel: str
     transport_units: List[Container]
@@ -128,7 +128,7 @@ class ImportReport(BaseReport):
         }
 
 
-class SelfImportReport(BaseReport):
+class SelfImportOnAutoReport(BaseReport):
     transport_units: List[Truck]
 
     def as_header(self) -> dict:

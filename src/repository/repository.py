@@ -12,7 +12,7 @@ from more_itertools import chunked
 from src.repository.dao import DocumentDAOInterface
 from src.repository.exceptions import DraftDocumentNotFound
 from src.repository.models import (
-    Table, Row, BaseReport, ImportReport, SelfImportReport, PickupFromSupplierReport
+    Table, Row, BaseReport, SelfImportReport, SelfImportOnAutoReport, PickupFromSupplierReport
 )
 
 

@@ -152,7 +152,7 @@ export default {
                       cultivar: [application.cultivar],
                       units: [application.units],
                       invoice: application.invoice,
-                      date: application.date,
+                      date: new Date(application.date).toLocaleDateString(),
                       calibre: [application.calibre],
                       temperature: temperatureData
                   }

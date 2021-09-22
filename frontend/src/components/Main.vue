@@ -23,11 +23,11 @@
         <button v-if="inspectionDate" @click="$refs.file.click()" class="btn btn-success">Выберите файл заявки...</button>
         <br>
         <br>
-        <ImportApplicationsTable
-            v-if="importApplication && showTable"
+        <SelfImportApplicationsTable
+            v-if="selfImportApplication && showTable"
             :applications-json-list="applicationsList"
             @ApplicationsSelectedEvent="toThermalData"
-        ></ImportApplicationsTable>
+        ></SelfImportApplicationsTable>
         <ThermographsData
             v-if="applicationsSelected"
             @ThermalDataInsertedEvent="toPalletsData"
@@ -49,7 +49,7 @@
 import axios from 'axios';
 import XLSX from 'xlsx';
 import Gallery from './Gallery.vue';
-import ImportApplicationsTable from "./ImportApplicationsTable";
+import SelfImportApplicationsTable from "./SelfImportApplicationsTable";
 import ThermographsData from "./ThermographsData";
 import PalletsData from "./PalletsData";
 
@@ -61,7 +61,7 @@ export default {
       reportNumber: 'IL-NS-0',
       inspectionDateRow: '',
       twoDaysInspection: false,
-      importApplication: false,
+      selfImportApplication: false,
       showTable: true,
       applicationsSelected: false,
       thermalDataSet: false,
@@ -73,7 +73,7 @@ export default {
   },
   components: {
     Gallery,
-    ImportApplicationsTable,
+    SelfImportApplicationsTable,
     ThermographsData,
     PalletsData,
   },
@@ -120,7 +120,7 @@ export default {
     },
     resolveApplicationType(jsonList) {
       if (jsonList[0]["контейнер"] || jsonList[0]["Контейнер"]) {
-        this.importApplication = true;
+        this.selfImportApplication = true;
       }
       this.saveReport();
     },
@@ -134,7 +134,7 @@ export default {
       this.attachPhotos = false;
       this.photosSet = false;
       this.docReceived = false;
-      this.importApplication = false;
+      this.selfImportApplication = false;
       this.showTable = true;
       this.applicationsSelected = false;
       this.textFinished = false;

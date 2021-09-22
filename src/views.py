@@ -4,7 +4,7 @@ from fastapi import Body, APIRouter, Path, UploadFile, File
 from fastapi.responses import FileResponse
 
 from src.repository.configuration import AgentReportRepositoryConfigurator
-from src.repository.models import Application, Header
+from src.repository.models import BaseReport, SelfImportReport, SelfImportOnAutoReport, PickupFromSupplierReport
 
 REPOSITORY = AgentReportRepositoryConfigurator().repository()
 
