@@ -56,7 +56,7 @@
                     :key="unit.number"
                     class="d-flex"
                 >
-                  <td>{{unit.number}}</td>
+                  <td v-if="unit.temperature.thermographs.length">{{unit.number}}</td>
                   <td>
                     <table class="table table-hover">
                       <tbody>
@@ -67,8 +67,8 @@
                               <input required type="file" accept="image/jpg,image/jpeg,image/png" @change="thermograph.graph = $event.target.files[0]">
                             </label>
                           </td>
-                          <td class="col-2"> Макс. темп. <input required v-model.lazy="thermograph.min" type="number" step="0.1"></td>
-                          <td class="col-2"> Мин. темп. <input required v-model.lazy="thermograph.max" type="number" step="0.1"></td>
+                          <td class="col-2"> Мин. темп. <input required v-model.lazy="thermograph.min" type="number" step="0.1"></td>
+                          <td class="col-2"> Макс. темп. <input required v-model.lazy="thermograph.max" type="number" step="0.1"></td>
                         </tr>
                       </tbody>
                     </table>
