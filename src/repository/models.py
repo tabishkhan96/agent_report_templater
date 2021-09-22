@@ -22,6 +22,7 @@ class Row(ABC):
 
 class Table(ABC):
     """Интерфейс таблиц, использующихся в репозитории бизнес-логики"""
+    columns: list
 
     @abstractmethod
     def add_row(self) -> Row:
@@ -73,8 +74,8 @@ class TransportUnit(BaseModel):
     not_full_boxes: int = 0
 
     @validator("cargo", allow_reuse=True)
-    def strip_cargo(cls, value: str):
-        return value.strip()
+    def strip_cargo(cls, value: List[str]):
+        return [v.strip() for v in value]
 
 
 class Container(TransportUnit):
