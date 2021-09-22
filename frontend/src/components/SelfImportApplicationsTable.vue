@@ -18,7 +18,7 @@
           </thead>
           <tbody>
             <tr
-                v-for="application in applicationsList"
+                v-for="application in applicationsListForShow"
                 :key="application.id"
                 class="d-flex"
                 @click="application.selected=!application.selected"
@@ -77,6 +77,13 @@ export default {
   computed: {
     hasSelected() {
       return this.applicationsList.some(function (element) {return element.selected})
+    },
+    applicationsListForShow() {
+      let selectedOrder = this.applicationsList.filter(a => a.selected).length ? this.applicationsList.filter(a => a.selected)[0].order : null;
+      if (selectedOrder) {
+        return this.applicationsList.filter(a => a.order === selectedOrder)
+      }
+      return this.applicationsList
     }
   },
   methods: {
