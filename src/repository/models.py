@@ -61,7 +61,7 @@ class TransportUnit(BaseModel):
     cultivar: List[str]
     units: List[str]
     invoice: str
-    date: date
+    date: str
     calibre: List[str]
     temperature: TemperatureData
     pallets: int = 0
