@@ -3,11 +3,12 @@ import os
 import uuid
 from copy import deepcopy
 from datetime import datetime
-from typing import Type, List
+from typing import List, Dict, Callable
 from fastapi import UploadFile
 from fastapi.responses import FileResponse
 from dynaconf import settings
 from more_itertools import chunked
+from pydantic import BaseModel
 
 from src.repository.dao import DocumentDAOInterface
 from src.repository.exceptions import DraftDocumentNotFound
@@ -34,40 +35,33 @@ from src.repository.models import (
 class AgentReportRepository:
     """Репозиторий бизнес-логики приложения"""
 
-    def __init__(self, document_dao: Type[DocumentDAOInterface]):
+    def __init__(self, document_dao: type[DocumentDAOInterface]):
         self.logger: logging.Logger = logging.getLogger("repository")
-        self.document_dao: Type[DocumentDAOInterface] = document_dao
+        self.document_dao: type[DocumentDAOInterface] = document_dao
+        self.strategies_mapping: Dict[type[BaseModel], Callable[[BaseReport, DocumentDAOInterface], str]] = {
+            SelfImportReport: self._create_report_for_self_import_strategy,
+            SelfImportOnAutoReport: ...,
+            PickupFromSupplierReport: ...,
+        }
 
     def create_report(self, report: BaseReport) -> str:
         """
         Метод создания черновика отчета.
 
-        Черновик состоит из текстовой части-заголовка, который заполняется из заявки, таблицы данных о температуре в
-        каждом контейнере, тальманского отчета по каждому контейнеру, таблиц результатов, замера калибров, заключения,
-        времени жизни и данных о исполнителе. Также добавляется место под график температурных датчиков (два для каждого
-        контейнера)
+        Метод создает черновик и заполняет его заголовок.
+        Заполнение остальных данных происходит в соответствующих методах-стратегиях.
 
-        :param application: данные заявки
+        :param report: данные заявки
         :return str: хеш созданного черновика
         """
-        header_data: Header = Header(
-            report_number=application.report_number,
-            place=application.place_of_inspection,
-            shipper=application.supplier,
-            cargo=application.cargo,
-            transport_units=application.containers,
-            vessel=application.vessel,
-            invoice=application.invoice,
-            order=application.order,
-            BL=application.BL
+        doc = self.document_dao(
+            path=f"{settings.REPOSITORY.TEMPLATES_DIR}/{type(report).__name__}/header_template.{settings.DOC_TYPE}"
         )
-        doc = self.document_dao(f"{settings.REPOSITORY.TEMPLATES_DIR}/report_template.{settings.DOC_TYPE}")
 
-        cargo_in_english: str = (
-                settings.VEGETABLES.get(header_data.cargo.lower(), '') or
-                settings.FRUITS.get(header_data.cargo.lower(), '')
-        )
-        header_data.cargo = f"{header_data.cargo} / {cargo_in_english}"
+        for unit in report.transport_units:
+            unit.cargo_in_english = [
+                settings.VEGETABLES.get(cargo.lower()) or settings.FRUITS.get(cargo.lower(), '') for cargo in unit.cargo
+            ]
 
         header: Table = doc.get_tables()[0]
         # распихиваем данные в заголовок отчета
@@ -77,6 +71,19 @@ class AgentReportRepository:
             cell.text = text
             doc.set_cell_style(cell)
 
+        # doc.save(f"{settings.REPOSITORY.REPORTS_DIR}/test.{settings.DOC_TYPE}")
+        # return f"{settings.REPOSITORY.REPORTS_DIR}/test.{settings.DOC_TYPE}"
+        return self.strategies_mapping[type(report)](report, doc)
+
+    def _create_report_for_self_import_strategy(self, report: SelfImportReport, doc: DocumentDAOInterface):
+        """
+        Создание отчета для собственного импорта.
+
+        Заполняются таблицы данных о температуре в каждой транспортной единице (ТЕ), добавляются графики датчиков,
+        определяются нарушения температурного режима (при их наличии создается письмо протеста), создаются шаблоны
+        таблиц тальманского счета по каждой ТЕ, таблицы результатов инспекции, замера калибров, заключения, времени
+        жизни и данных о исполнителе.
+        """
         temperature_data: Table = doc.get_tables()[1]
         for container in header_data.transport_units:
             row: Row = temperature_data.add_row()
