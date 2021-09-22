@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from datetime import date
 from typing import List, Optional
 from pydantic import BaseModel, validator
 from fastapi import UploadFile
+import functools
 
 
 class Cell(ABC):
@@ -103,6 +103,26 @@ class BaseReport(BaseModel):
 
     def as_header(self) -> dict:
         """Data representation for Report's Header"""
+        suppliers, cargos, cargos_in_english, invoices = [], [], [], []
+        for unit in self.transport_units:
+            suppliers.append(unit.supplier) if unit.supplier not in suppliers else ...
+            cargos.append(unit.cargo) if unit.cargo not in cargos else ...
+            cargos_in_english.append(unit.cargo_in_english) if unit.cargo_in_english not in cargos_in_english else ...
+            invoices.append(unit.invoice) if unit.invoice not in invoices else ...
+        cargos = functools.reduce(lambda x, y: x + y, cargos)
+        cargos_in_english = functools.reduce(lambda x, y: x + y, cargos_in_english)
+        return {
+            'report_number': self.number,
+            'place_of_inspection': self.place_of_inspection,
+            'inspection_date': self.inspection_date,
+            'shipper': suppliers,
+            'cargo': [
+                f'{cargo} / {cargo_in_english}' for cargo, cargo_in_english in zip(cargos, cargos_in_english)
+            ],
+            'transport_units': self.transport_units_numbers(),
+            'invoice': invoices,
+            'order': self.order,
+        }
 
     def transport_units_numbers(self) -> List[str]:
         return [unit.number for unit in self.transport_units]
@@ -114,52 +134,35 @@ class SelfImportReport(BaseReport):
     transport_units: List[Container]
 
     def as_header(self) -> dict:
-        return {
-            'report_number': self.number,
-            'place_of_inspection': self.place_of_inspection,
-            'inspection_date': self.inspection_date,
-            'shipper': [unit.supplier for unit in self.transport_units],
-            'cargo': [f'{unit.cargo} / {unit.cargo_in_english}' for unit in self.transport_units],
-            'transport_units': [unit.number for unit in self.transport_units],
+        header: dict = super().as_header()
+        header.update({
             'vessel': self.vessel,
-            'invoice': [unit.invoice for unit in self.transport_units],
-            'order': self.order,
             'BL': [unit.BL for unit in self.transport_units],
-        }
+        })
+        return header
 
 
 class SelfImportOnAutoReport(BaseReport):
     transport_units: List[Truck]
 
     def as_header(self) -> dict:
-        return {
-            'report_number': self.number,
-            'place_of_inspection': self.place_of_inspection,
-            'inspection_date': self.inspection_date,
-            'shipper': [unit.supplier for unit in self.transport_units],
-            'cargo': [f'{unit.cargo} / {unit.cargo_in_english}' for unit in self.transport_units],
-            'transport_units': [unit.number for unit in self.transport_units],
-            'invoice': [unit.invoice for unit in self.transport_units],
-            'order': self.order,
+        header: dict = super().as_header()
+        header.update({
             'CMR': [unit.CMR for unit in self.transport_units],
-        }
+        })
+        return header
 
 
 class PickupFromSupplierReport(BaseReport):
     transport_units: List[SuppliersTransportUnit]
 
     def as_header(self) -> dict:
-        return {
-            'report_number': self.number,
-            'cargo': [f'{unit.cargo} / {unit.cargo_in_english}' for unit in self.transport_units],
-            'transport_units': [unit.number for unit in self.transport_units],
-            'order': self.order,
-            'shipper': [unit.supplier for unit in self.transport_units],
-            'inspection_date': self.inspection_date,
+        header: dict = super().as_header()
+        header.update({
             'discharge_date': [unit.date for unit in self.transport_units],
-            'place_of_inspection': self.place_of_inspection,
             'distribution_center_receiver': [unit.distribution_center_receiver for unit in self.transport_units]
-        }
+        })
+        return header
 
 class Header(BaseModel):
     """Модель заголовка отчета"""
