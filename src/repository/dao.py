@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Union, Any
+from typing import List, Union, Any, Generator
 
 import docx
 from docx.document import Document as DocxDocument, ElementProxy as DocxElementProxy
@@ -28,7 +28,7 @@ class DocumentDAOInterface(ABC):
         """Save document to storage"""
 
     @abstractmethod
-    def get_tables(self) -> List[Table]:
+    def get_tables(self) -> Generator[Table]:
         """Get list of tables of Doc"""
 
     @abstractmethod
@@ -83,9 +83,10 @@ class DocxDocumentDAO(DocumentDAOInterface):
         """Save document to storage"""
         self._document.save(doc_name)
 
-    def get_tables(self) -> List[DocxTable]:
+    def get_tables(self) -> Generator[DocxTable]:
         """Get list of tables of Doc"""
-        return self._document.tables
+        for table in self._document.tables:
+            yield table
 
     def append_part(self, obj: DocxElementProxy):
         """Append part to Doc"""
