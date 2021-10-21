@@ -7,7 +7,7 @@ from dynaconf import settings
 import logging
 import logging.config
 
-from src.repository.exceptions import WrongDocumentType
+from src.repository.exceptions import WrongDocumentTypeException
 from src.repository.repository import AgentReportRepository
 from src.repository import dao
 
@@ -24,7 +24,7 @@ class AgentReportRepositoryConfigurator:
     def documents_dao(self):
         dao_class: Type[dao.DocumentDAOInterface] = self.doc_dao_types.get(settings.DOC_TYPE)
         if not dao_class:
-            raise WrongDocumentType
+            raise WrongDocumentTypeException
         return dao_class
 
     def repository(self):

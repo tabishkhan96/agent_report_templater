@@ -2,7 +2,7 @@ class AppException(Exception):
     """Базовое исключение приложения"""
 
 
-class WrongDocumentType(AppException):
+class WrongDocumentTypeException(AppException):
     """Неверно указан тип документа в настройках"""
 
 

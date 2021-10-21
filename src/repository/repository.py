@@ -11,7 +11,7 @@ from more_itertools import chunked
 from pydantic import BaseModel
 
 from src.repository.dao import DocumentDAOInterface
-from src.repository.exceptions import DraftDocumentNotFound
+from src.repository.exceptions import DraftDocumentNotFoundException, DocumentTemplateCorruptedException
 from src.repository.models import (
     Table, Row, BaseReport, SelfImportReport, SelfImportOnAutoReport, PickupFromSupplierReport
 )
