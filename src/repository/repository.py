@@ -15,6 +15,7 @@ from src.repository.exceptions import DraftDocumentNotFoundException, DocumentTe
 from src.repository.models import (
     Table, Row, BaseReport, SelfImportReport, SelfImportOnAutoReport, PickupFromSupplierReport
 )
+from src.repository.template_engine import TemplateEngine
 
 
 # TODO
@@ -71,8 +72,9 @@ class AgentReportRepository:
             cell.text = text
             doc.set_cell_style(cell)
 
-        # doc.save(f"{settings.REPOSITORY.REPORTS_DIR}/test.{settings.DOC_TYPE}")
-        # return f"{settings.REPOSITORY.REPORTS_DIR}/test.{settings.DOC_TYPE}"
+        TemplateEngine.replace_in_table(table=header, values=report.header, cell_handler=doc.set_cell_style)
+
+        doc.save(f"{settings.REPOSITORY.REPORTS_DIR}/test.{settings.DOC_TYPE}")
         return self.strategies_mapping[type(report)](report, doc)
 
     def _create_report_for_self_import_strategy(self, report: SelfImportReport, doc: DocumentDAOInterface):
