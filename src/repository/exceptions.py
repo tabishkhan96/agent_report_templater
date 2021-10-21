@@ -6,5 +6,9 @@ class WrongDocumentTypeException(AppException):
     """Неверно указан тип документа в настройках"""
 
 
-class DraftDocumentNotFound(AppException):
+class DraftDocumentNotFoundException(AppException):
     """Черновик документа не найден"""
+
+
+class DocumentTemplateCorruptedException(AppException):
+    """Шаблон документа поврежден"""

@@ -180,7 +180,7 @@ class AgentReportRepository:
                 filename = file
                 break
         if not filename:
-            raise DraftDocumentNotFound
+            raise DraftDocumentNotFoundException
 
         doc = self.document_dao(f'{settings.REPOSITORY.REPORTS_DIR}/{filename}')
 
