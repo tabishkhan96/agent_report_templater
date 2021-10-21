@@ -102,7 +102,8 @@ class BaseReport(BaseModel):
     inspection_date: str
     transport_units: List[TransportUnit]
 
-    def as_header(self) -> dict:
+    @property
+    def header(self) -> dict:
         """Data representation for Report's Header"""
         suppliers, cargos, cargos_in_english, invoices = [], [], [], []
         for unit in self.transport_units:
@@ -134,8 +135,9 @@ class SelfImportReport(BaseReport):
     vessel: str
     transport_units: List[Container]
 
-    def as_header(self) -> dict:
-        header: dict = super().as_header()
+    @property
+    def header(self) -> dict:
+        header: dict = super().header
         header.update({
             'vessel': self.vessel,
             'BL': [unit.BL for unit in self.transport_units],
@@ -146,8 +148,9 @@ class SelfImportReport(BaseReport):
 class SelfImportOnAutoReport(BaseReport):
     transport_units: List[Truck]
 
-    def as_header(self) -> dict:
-        header: dict = super().as_header()
+    @property
+    def header(self) -> dict:
+        header: dict = super().header
         header.update({
             'CMR': [unit.CMR for unit in self.transport_units],
         })
@@ -157,23 +160,11 @@ class SelfImportOnAutoReport(BaseReport):
 class PickupFromSupplierReport(BaseReport):
     transport_units: List[SuppliersTransportUnit]
 
-    def as_header(self) -> dict:
-        header: dict = super().as_header()
+    @property
+    def header(self) -> dict:
+        header: dict = super().header
         header.update({
             'discharge_date': [unit.date for unit in self.transport_units],
             'distribution_center_receiver': [unit.distribution_center_receiver for unit in self.transport_units]
         })
         return header
-
-class Header(BaseModel):
-    """Модель заголовка отчета"""
-    report_number: str = "IL-NS-0"
-    place: str
-    date: Union[List[str], str] = date.today().strftime('%d.%m.%Y')
-    shipper: Union[List[str], str]
-    cargo: str
-    transport_units: List[str]
-    vessel: Union[List[str], str]
-    invoice: Union[List[str], str]
-    order: str
-    BL: Union[List[str], str]
