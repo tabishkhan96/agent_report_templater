@@ -44,6 +44,7 @@ class ThermometerBoundaries(BaseModel):
 
 
 class ThermographData(ThermometerBoundaries):
+    number: str
     graph: Optional[UploadFile]
     worked: str
 
