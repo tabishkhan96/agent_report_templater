@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 import logging
-import uuid
 from copy import deepcopy
-from datetime import datetime
 from typing import Generator, Optional, Type
 from dynaconf import settings
 
@@ -22,7 +20,11 @@ class ReportCreationStrategyInterface(ABC):
     report: BaseReport
 
     @abstractmethod
-    def execute(self, report_doc: DocumentDAOInterface) -> str:
+    def __init__(self, document_dao: Type[DocumentDAOInterface], report: SelfImportReport):
+        ...
+
+    @abstractmethod
+    def execute(self, report_doc: DocumentDAOInterface) -> DocumentDAOInterface:
         ...
 
 
@@ -33,7 +35,7 @@ class SelfImportReportCreationStrategy(ReportCreationStrategyInterface):
         self.document_dao: Type[DocumentDAOInterface] = document_dao
         self.report: SelfImportReport = report
 
-    def execute(self, report_doc: DocumentDAOInterface) -> str:
+    def execute(self, report_doc: DocumentDAOInterface) -> DocumentDAOInterface:
         """
         Создание отчета для собственного импорта.
 
@@ -152,12 +154,12 @@ class SelfImportReportCreationStrategy(ReportCreationStrategyInterface):
         for container in self.report.transport_units:
             pallets_table = deepcopy(pallets_table_template)
             TemplateEngine.replace_in_table(table=pallets_table, values=container,
-                                            cell_handler=report_doc.set_cell_style)
+                                            cell_handler=self.document_dao.set_cell_style)
             report_doc.append_table(pallets_table)
 
             tally_account_table = deepcopy(tally_account_table_template)
             TemplateEngine.replace_in_table(
-                table=tally_account_table, values=container, cell_handler=report_doc.set_cell_style
+                table=tally_account_table, values=container, cell_handler=self.document_dao.set_cell_style
             )
             report_doc.append_table(tally_account_table)
 

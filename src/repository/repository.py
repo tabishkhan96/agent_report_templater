@@ -1,5 +1,6 @@
 import logging
 import os
+import uuid
 from copy import deepcopy
 from typing import List, Type
 from fastapi import UploadFile
@@ -39,7 +40,7 @@ class AgentReportRepository:
     def __init__(self, document_dao: Type[DocumentDAOInterface]):
         self.logger: logging.Logger = logging.getLogger("repository")
         self.document_dao: Type[DocumentDAOInterface] = document_dao
-        self.strategies_mapping: dict[Type[BaseModel], Type[ReportCreationStrategyInterface]] = {
+        self.doc_filling_strategies_mapping: dict[Type[BaseModel], Type[ReportCreationStrategyInterface]] = {
             SelfImportReport: SelfImportReportCreationStrategy,
             SelfImportOnAutoReport: ...,
             PickupFromSupplierReport: ...,
@@ -50,7 +51,7 @@ class AgentReportRepository:
         Метод создания черновика отчета.
 
         Метод создает черновик и заполняет его заголовок.
-        Заполнение остальных данных происходит в соответствующих методах-стратегиях.
+        Заполнение остальных данных происходит в соответствующих стратегиях.
 
         :param report: данные заявки
         :return str: хеш созданного черновика
@@ -70,8 +71,15 @@ class AgentReportRepository:
 
         TemplateEngine.replace_in_table(table=header, values=report.header, cell_handler=doc.set_cell_style)
 
-        doc.save(f"{settings.REPOSITORY.REPORTS_DIR}/test.{settings.DOC_TYPE}")
-        return self.strategies_mapping[type(report)](self.document_dao, report).execute(doc)
+        self.doc_filling_strategies_mapping[type(report)](self.document_dao, report).execute(doc)
+
+        doc_guid: str = uuid.uuid4().hex
+        filename: str = f"{doc_guid}_{report.number}_{report.order}_" \
+                        f"{report.inspection_date}".replace("/", '')
+
+        doc.save(f"{settings.REPOSITORY.REPORTS_DIR}/{filename}.{settings.DOC_TYPE}")
+        self.logger.info(f"Doc saved to '{settings.REPOSITORY.REPORTS_DIR}/' with GUID {doc_guid}.")
+        return doc_guid
 
     def get_reports(self) -> List[BaseReport]:
         raise NotImplemented
