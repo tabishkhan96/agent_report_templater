@@ -23,6 +23,7 @@ class Row(ABC):
 class Table(ABC):
     """Интерфейс таблиц, использующихся в репозитории бизнес-логики"""
     columns: list
+    rows: list[Row]
 
     @abstractmethod
     def add_row(self) -> Row:
@@ -121,13 +122,10 @@ class BaseReport(BaseModel):
             'cargo': [
                 f'{cargo} / {cargo_in_english}' for cargo, cargo_in_english in zip(cargos, cargos_in_english)
             ],
-            'transport_units': self.transport_units_numbers(),
+            'transport_units': [unit.number for unit in self.transport_units],
             'invoice': invoices,
             'order': self.order,
         }
-
-    def transport_units_numbers(self) -> List[str]:
-        return [unit.number for unit in self.transport_units]
 
 
 class SelfImportReport(BaseReport):
