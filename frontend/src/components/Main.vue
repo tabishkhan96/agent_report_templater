@@ -14,6 +14,7 @@
           <label v-if="inspectionDateRow"> добавить следующий день: <input type="checkbox" v-model="twoDaysInspection"/> </label>
         </label>
         <br>
+        <label> Имя и фамилия инспектора: рус.:<input v-model.lazy="surveyor"/> англ.:<input v-model.lazy="surveyorEng"/></label><br>
         <input type="file"
                ref="file"
                accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -61,6 +62,8 @@ export default {
       reportNumber: 'IL-NS-0',
       inspectionDateRow: '',
       twoDaysInspection: false,
+      surveyor: '',
+      surveyorEng: '',
       selfImportApplication: false,
       showTable: true,
       applicationsSelected: false,
@@ -96,6 +99,7 @@ export default {
       report.place_of_inspection = this.placeOfInspection;
       report.number = this.reportNumber;
       report.inspection_date = this.inspectionDate;
+      report.surveyor = this.surveyor + ' / ' + this.surveyorEng;
       return report
     }
   },

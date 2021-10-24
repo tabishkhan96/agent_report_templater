@@ -1,3 +1,4 @@
+import datetime
 from abc import ABC, abstractmethod
 from typing import List, Optional
 from pydantic import BaseModel, validator
@@ -102,6 +103,8 @@ class BaseReport(BaseModel):
     number: str
     order: str
     inspection_date: str
+    surveyor: str
+    issue_date: str = datetime.date.today().strftime('%d.%m.%Y')
     transport_units: List[TransportUnit]
 
     @property
