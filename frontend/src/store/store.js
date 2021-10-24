@@ -8,7 +8,7 @@ const store = createStore({
         number: '',
         place_of_inspection: '',
         inspection_date: '',
-        vessel: '',
+        surveyor: '',
         transport_units: []
       },
       transportUnitModel: {
@@ -40,6 +40,7 @@ const store = createStore({
         max: 0.0
       },
       thermographDataModel: {
+        number: '',
         graph: null,
         worked: '',
         min: 0.0,
@@ -57,7 +58,7 @@ const store = createStore({
         number: '',
         place_of_inspection: '',
         inspection_date: '',
-        vessel: '',
+        surveyor: '',
         transport_units: []
       };
     },
