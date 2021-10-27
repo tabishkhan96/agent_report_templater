@@ -44,46 +44,27 @@ class SelfImportReportCreationStrategy(ReportCreationStrategyInterface):
         таблиц тальманского счета по каждой ТЕ, таблицы результатов инспекции, замера калибров, заключения, времени
         жизни и данных о исполнителе.
         """
-        temperature_table_template: Optional[Table] = next(
-            self.document_dao(
-                f"{settings.REPOSITORY.TEMPLATES_DIR}/{type(self.report).__name__}/temperature_template.{settings.DOC_TYPE}"
-            ).get_tables(),
-            None
-        )
+        temperature_table_template: Optional[Table] = next(self._get_tables_from_template('temperature_template'), None)
         if not temperature_table_template:
             raise DocumentTemplateCorruptedException('Отсутствует шаблон таблицы температурных данных')
-
         self.add_temperature_table(report_doc, temperature_table_template)
 
-        tally_account_and_pallets_tables = self.document_dao(
-            f"{settings.REPOSITORY.TEMPLATES_DIR}/{type(self.report).__name__}/tally_account_template.{settings.DOC_TYPE}"
-        ).get_tables()
-
+        tally_account_and_pallets_tables = self._get_tables_from_template('tally_account_template')
         pallets_table_template: Optional[Table] = next(tally_account_and_pallets_tables, None)
         if not pallets_table_template:
             raise DocumentTemplateCorruptedException('Отсутствует шаблон таблицы паллетов')
-
         tally_account_table_template: Optional[Table] = next(tally_account_and_pallets_tables, None)
         if not tally_account_table_template:
             raise DocumentTemplateCorruptedException('Отсутствует шаблон таблицы тальманского счета')
-
         self.add_tally_account_and_pallets_tables(report_doc, pallets_table_template, tally_account_table_template)
 
-        inspection_result_template = self.document_dao(
-            f"{settings.REPOSITORY.TEMPLATES_DIR}/{type(self.report).__name__}/inspection_result_template.{settings.DOC_TYPE}"
-        )
+        self.add_inspection_result_tables(report_doc, self._get_template_dao('inspection_result_template'))
 
-        self.add_inspection_result_tables(report_doc, inspection_result_template)
-
-        conclusion_template = self.document_dao(
-            f"{settings.REPOSITORY.TEMPLATES_DIR}/{type(self.report).__name__}/conclusion_template.{settings.DOC_TYPE}"
-        ).get_tables()
-
-        calibre_table = deepcopy(next(conclusion_template, None))
-        conclusion_table = deepcopy(next(conclusion_template, None))
-        shelf_life_table = deepcopy(next(conclusion_template, None))
-        executor_table = deepcopy(next(conclusion_template, None))
-
+        conclusion_template = self._get_tables_from_template('conclusion_template')
+        calibre_table: Optional[Table] = deepcopy(next(conclusion_template, None))
+        conclusion_table: Optional[Table] = deepcopy(next(conclusion_template, None))
+        shelf_life_table: Optional[Table] = deepcopy(next(conclusion_template, None))
+        executor_table: Optional[Table] = deepcopy(next(conclusion_template, None))
         if not calibre_table or not conclusion_table or not shelf_life_table or not executor_table:
             raise DocumentTemplateCorruptedException('Отсутствует один из шаблонов таблиц заключения')
 
@@ -177,3 +158,11 @@ class SelfImportReportCreationStrategy(ReportCreationStrategyInterface):
                 self.document_dao.set_cell_style(cell)
 
         TemplateEngine.replace_in_table(table=table, values=self.report, cell_handler=self.document_dao.set_cell_style)
+
+    def _get_template_dao(self, template_name: str) -> DocumentDAOInterface:
+        return self.document_dao(
+            f"{settings.REPOSITORY.TEMPLATES_DIR}/{type(self.report).__name__}/{template_name}.{settings.DOC_TYPE}"
+        )
+
+    def _get_tables_from_template(self, template_name: str) -> Generator[Table]:
+        return self._get_template_dao(template_name).get_tables()

@@ -1,6 +1,5 @@
 import re
 from typing import Dict, Any, Union, Callable, Optional
-
 from pydantic import BaseModel
 
 from src.repository.models import Table, Cell
