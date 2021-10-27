@@ -59,18 +59,11 @@ class AgentReportRepository:
         doc = self.document_dao(
             path=f"{settings.REPOSITORY.TEMPLATES_DIR}/{type(report).__name__}/header_template.{settings.DOC_TYPE}"
         )
-
-        for unit in report.transport_units:
-            unit.cargo_in_english = [
-                settings.VEGETABLES.get(cargo.lower()) or settings.FRUITS.get(cargo.lower(), '') for cargo in unit.cargo
-            ]
-
         header: Table = next(doc.get_tables(), None)
         if not header:
             raise DocumentTemplateCorruptedException('Отсутствует таблица-заголовок')
 
-        TemplateEngine.replace_in_table(table=header, values=report.header, cell_handler=doc.set_cell_style)
-
+        self.fill_header_table(report, header)
         self.doc_filling_strategies_mapping[type(report)](self.document_dao, report).execute(doc)
 
         doc_guid: str = uuid.uuid4().hex
@@ -80,6 +73,15 @@ class AgentReportRepository:
         doc.save(f"{settings.REPOSITORY.REPORTS_DIR}/{filename}.{settings.DOC_TYPE}")
         self.logger.info(f"Doc saved to '{settings.REPOSITORY.REPORTS_DIR}/' with GUID {doc_guid}.")
         return doc_guid
+
+    def fill_header_table(self, report: BaseReport, header_table: Table):
+        for unit in report.transport_units:
+            unit.cargo_in_english = [
+                settings.VEGETABLES.get(cargo.lower()) or settings.FRUITS.get(cargo.lower(), '') for cargo in unit.cargo
+            ]
+        TemplateEngine.replace_in_table(
+            table=header_table, values=report.header, cell_handler=self.document_dao.set_cell_style
+        )
 
     def get_reports(self) -> List[BaseReport]:
         raise NotImplemented
