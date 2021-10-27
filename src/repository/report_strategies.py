@@ -71,11 +71,7 @@ class SelfImportReportCreationStrategy(ReportCreationStrategyInterface):
         self.add_calibre_table(report_doc, calibre_table)
         self.add_conclusion_table(report_doc, conclusion_table)
         self.add_shelf_life_table(report_doc, shelf_life_table)
-        TemplateEngine.replace_in_table(
-            table=executor_table, values=self.report, cell_handler=self.document_dao.set_cell_style
-        )
-        report_doc.append_table(executor_table)
-
+        self.add_executor_table(report_doc, executor_table)
         report_doc.add_page_break()
         self.add_pictures_of_thermographs(report_doc)
         return report_doc
@@ -131,6 +127,12 @@ class SelfImportReportCreationStrategy(ReportCreationStrategyInterface):
     def add_shelf_life_table(self, report_doc, shelf_life_table):
         self._fill_table_with_row_for_container(self.report.transport_units, shelf_life_table)
         report_doc.append_table(shelf_life_table)
+
+    def add_executor_table(self, report_doc: DocumentDAOInterface, executor_table: Table):
+        TemplateEngine.replace_in_table(
+            table=executor_table, values=self.report, cell_handler=self.document_dao.set_cell_style
+        )
+        report_doc.append_table(executor_table)
 
     def add_pictures_of_thermographs(self, report_doc):
         for TU in self.report.transport_units:
