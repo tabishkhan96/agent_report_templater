@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Union, Any, Generator
+from typing import List, Union, Any, Generator, BinaryIO
 
 import docx
 from docx.document import Document as DocxDocument, ElementProxy as DocxElementProxy
@@ -44,13 +44,14 @@ class DocumentDAOInterface(ABC):
         """Get list of paragraphs"""
 
     @abstractmethod
-    def append_paragraph(self, paragraph: Union[str, Any]):
+    def append_paragraph(self, paragraph: str):
         """Add text paragraph to the end of Doc"""
 
     @abstractmethod
     def add_page_break(self):
         """Add page break of Doc"""
 
+    @classmethod
     @abstractmethod
     def set_cell_style(
             self,
@@ -62,15 +63,14 @@ class DocumentDAOInterface(ABC):
     ):
         """Set table cell style shortcut"""
 
+    @classmethod
     @abstractmethod
-    def insert_picture_into_cell(self, cell: Cell, pic, height: int = 8, width: int = 8):
+    def insert_picture_into_cell(cls, cell: Cell, pic: BinaryIO, height: int = 8, width: int = 8):
         """Insert picture into cell shortcut"""
 
 
 class DocxDocumentDAO(DocumentDAOInterface):
-    """
-    Класс доступа к документам типа .docx
-    """
+    """Класс доступа к документам типа .docx """
     def load(self, path: str):
         """Load document form disc"""
         return docx.Document(path)
@@ -102,14 +102,15 @@ class DocxDocumentDAO(DocumentDAOInterface):
         """"Get list of paragraphs"""
         return self._document.paragraphs
 
-    def append_paragraph(self, paragraph: Union[str, Any]):
+    def append_paragraph(self, paragraph: str):
         return self._document.add_paragraph(text=paragraph)
 
     def add_page_break(self):
         self._document.add_page_break()
 
+    @classmethod
     def set_cell_style(
-            self,
+            cls,
             cell: Cell,
             alignment: str = 'center',
             italic: bool = False,
@@ -121,5 +122,6 @@ class DocxDocumentDAO(DocumentDAOInterface):
         cell.paragraphs[0].runs[0].italic = italic
         cell.paragraphs[0].runs[0].font.name = font
 
-    def insert_picture_into_cell(self, cell: Cell, pic, height: int = 8, width: int = 8):
+    @classmethod
+    def insert_picture_into_cell(cls, cell: Cell, pic: BinaryIO, height: int = 8, width: int = 8):
         cell.paragraphs[0].add_run().add_picture(pic, width=Cm(width), height=Cm(height))
