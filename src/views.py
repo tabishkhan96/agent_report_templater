@@ -26,10 +26,10 @@ async def reports_in_progress() -> List[BaseReport]:
     return REPOSITORY.get_reports()
 
 
-@report_api.patch("/{doc_guid}", name="Добавить фотографии к отчету")
+@report_api.patch("/", name="Добавить фотографии к отчету")
 async def add_photos(
-        doc_guid: str = Path(..., description="GUID черновика отчета", min_length=32, max_length=32),
+        filename: str = Body(..., description="GUID черновика отчета", min_length=32, max_length=32),
         pictures: List[UploadFile] = File(..., description="Файлы фотографий")
 ) -> FileResponse:
     """Добавить фотографии к отчету."""
-    return REPOSITORY.add_pictures(doc_guid, pictures)
+    return REPOSITORY.add_pictures(filename, pictures)

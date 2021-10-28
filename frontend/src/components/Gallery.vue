@@ -63,7 +63,7 @@ export default {
       message: ''
     };
   },
-  props: ["docGuid"],
+  props: ["docFileName"],
   computed: {
     picturesListChunked() {
       let result = [];
@@ -128,12 +128,13 @@ export default {
     },
     async uploadPhotos () {
       let data = new FormData();
+      data.append('filename', this.docFileName)
       for (let i = 0; i < this.picturesList.length; i++ ) {
          data.append('pictures', this.picturesList[i].file);
       }
       let config = {header : {'Content-Type' : 'multipart/form-data'}, responseType: 'blob'};
       try {
-        let res = await axios.patch(`http://0.0.0.0:8080/report/${this.docGuid}`, data, config);
+        let res = await axios.patch(`http://0.0.0.0:8080/report/`, data, config);
         let blob = new Blob([res.data], {type: res.headers["content-type"]});
         let fileName = res.headers["content-disposition"].split("filename*=utf-8''")[1];
         let link = this.$refs['getAgain'];

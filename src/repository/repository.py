@@ -1,8 +1,7 @@
 import logging
 import os
-import uuid
 from copy import deepcopy
-from typing import List, Type
+from typing import List, Type, BinaryIO, Optional
 from fastapi import UploadFile
 from fastapi.responses import FileResponse
 from dynaconf import settings
@@ -46,7 +45,7 @@ class AgentReportRepository:
             PickupFromSupplierReport: ...,
         }
 
-    def create_report(self, report: BaseReport) -> str:
+    def create_report(self, report: BaseReport) -> FileResponse:
         """
         Метод создания черновика отчета.
 
@@ -54,7 +53,7 @@ class AgentReportRepository:
         Заполнение остальных данных происходит в соответствующих стратегиях.
 
         :param report: данные заявки
-        :return str: хеш созданного черновика
+        :return str: название файла черновика отчета
         """
         doc = self.document_dao(
             path=f"{settings.REPOSITORY.TEMPLATES_DIR}/{type(report).__name__}/header_template.{settings.DOC_TYPE}"
@@ -66,13 +65,18 @@ class AgentReportRepository:
         self.fill_header_table(report, header)
         self.doc_filling_strategies_mapping[type(report)](self.document_dao, report).execute(doc)
 
-        doc_guid: str = uuid.uuid4().hex
-        filename: str = f"{doc_guid}_{report.number}_{report.order}_" \
-                        f"{report.inspection_date}".replace("/", '')
+        filename: str = f"{report.number}_{report.order}_" \
+                        f"{'_'.join((tu.supplier for tu in report.transport_units))}_" \
+                        f"{'_'.join(('_'.join(tu.cargo) for tu in report.transport_units))}_" \
+                        f"{'_'.join((tu.number for tu in report.transport_units))}".replace('/', '')
 
-        doc.save(f"{settings.REPOSITORY.REPORTS_DIR}/{filename}.{settings.DOC_TYPE}")
-        self.logger.info(f"Doc saved to '{settings.REPOSITORY.REPORTS_DIR}/' with GUID {doc_guid}.")
-        return doc_guid
+        doc.save(f'{settings.REPOSITORY.REPORTS_DIR}/{filename}.{settings.DOC_TYPE}')
+        self.logger.info(f'Doc saved to "{settings.REPOSITORY.REPORTS_DIR}/" with name "{filename}".')
+        return FileResponse(
+            f"{settings.REPOSITORY.REPORTS_DIR}/{filename}.{settings.DOC_TYPE}",
+            filename=filename,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
 
     def fill_header_table(self, report: BaseReport, header_table: Table):
         for unit in report.transport_units:
@@ -86,25 +90,21 @@ class AgentReportRepository:
     def get_reports(self) -> List[BaseReport]:
         raise NotImplemented
 
-    def add_pictures(self, doc_guid: str, images: List[UploadFile]) -> FileResponse:
+    def add_pictures(self, doc_filename: str, images: List[UploadFile]) -> FileResponse:
         """
         Добавление фотографий к отчету.
 
         Фотографии добавляются в таблице 2 на 2, по одной таблице на страницу отчета.
 
-        :param doc_guid: GUID файла-отчета
+        :param doc_filename: имя файла отчета
         :param images: фотографии
         :return FileResponse: файл отчета
         """
-        filename: str = ''
-        for file in os.listdir(settings.REPOSITORY.REPORTS_DIR):
-            if file.startswith(doc_guid):
-                filename = file
-                break
-        if not filename:
+        if doc_filename not in os.listdir(settings.REPOSITORY.REPORTS_DIR):
             raise DraftDocumentNotFoundException
 
-        doc = self.document_dao(f'{settings.REPOSITORY.REPORTS_DIR}/{filename}')
+        doc = self.document_dao(f'{settings.REPOSITORY.REPORTS_DIR}/{doc_filename}')
+        doc.add_section(horizontal=True)
 
         images = [image.file for image in images]
 
@@ -122,12 +122,9 @@ class AgentReportRepository:
             for n, image in enumerate(images_chunk):
                 doc.insert_picture_into_cell(cells[n], image)
 
-        filename_without_guid: str = filename[33:]
-
-        doc.save(f"{settings.REPOSITORY.REPORTS_DIR}/{filename_without_guid}")
-        os.remove(f"{settings.REPOSITORY.REPORTS_DIR}/{filename}")
+        doc.save(f"{settings.REPOSITORY.REPORTS_DIR}/{doc_filename}")
         return FileResponse(
-            f"{settings.REPOSITORY.REPORTS_DIR}/{filename_without_guid}",
-            filename=filename_without_guid,
+            f"{settings.REPOSITORY.REPORTS_DIR}/{doc_filename}",
+            filename=doc_filename,
             media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )

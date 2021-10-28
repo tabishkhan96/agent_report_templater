@@ -40,7 +40,7 @@
         <br>
         <button v-if="textFinished" @click="createReport" class="btn btn-success">Создать текстовую часть отчета</button>
         <br>
-        <Gallery v-if="attachPhotos" :doc-guid="docGuid"></Gallery>
+        <Gallery v-if="attachPhotos" :doc-file-name="docFileName"></Gallery>
       </div>
     </div>
   </div>
@@ -70,7 +70,7 @@ export default {
       thermalDataSet: false,
       textFinished: false,
       attachPhotos: false,
-      docGuid: '',
+      docFileName: '',
       message: ''
     };
   },
