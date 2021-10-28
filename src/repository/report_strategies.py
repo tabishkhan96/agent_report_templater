@@ -107,12 +107,13 @@ class SelfImportReportCreationStrategy(ReportCreationStrategyInterface):
         containers_by_cargo: dict[str, list[Container]] = {
             cargo: [cont for cont in self.report.transport_units if cargo in cont.cargo] for cargo in cargos_in_report
         }
+        inspection_result_template_tables: list[Table] = list(inspection_result_template.get_tables())
         for cargo, containers in containers_by_cargo.values():
             try:
                 tbl_number: int = cargos_in_inspection_result_template.index(cargo) + 1
             except ValueError:
                 tbl_number = 0
-            table = list(inspection_result_template.get_tables())[tbl_number]
+            table = deepcopy(inspection_result_template_tables[tbl_number])
 
             self._fill_table_with_row_for_container(containers, table)
             report_doc.append_table(table)
