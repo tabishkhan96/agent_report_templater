@@ -142,7 +142,7 @@ class SelfImportReportCreationStrategy(ReportCreationStrategyInterface):
                 paragraph.runs[0].bold = True
                 paragraph.runs[0].font.name = "Times New Roman"
                 if thermograph.graph:
-                    report_doc.append_paragraph().add_run().add_picture(thermograph.graph)
+                    report_doc.append_picture(thermograph.graph.file)
             report_doc.add_page_break()
 
     def _fill_table_with_row_for_container(self, containers: list[Container], table: Table):

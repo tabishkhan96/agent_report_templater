@@ -4,6 +4,8 @@ from typing import List, Union, Any, Generator, BinaryIO
 import docx
 from docx.document import Document as DocxDocument, ElementProxy as DocxElementProxy
 from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.section import WD_ORIENTATION
+from docx.shape import InlineShape
 from docx.table import Table as DocxTable
 from docx.shared import Cm
 
@@ -32,10 +34,6 @@ class DocumentDAOInterface(ABC):
         """Get list of tables of Doc"""
 
     @abstractmethod
-    def append_part(self, obj: Union[Table, Any]):
-        """Append part to Doc"""
-
-    @abstractmethod
     def append_table(self, table: Table):
         """Add Table to the end of Doc"""
 
@@ -48,8 +46,16 @@ class DocumentDAOInterface(ABC):
         """Add text paragraph to the end of Doc"""
 
     @abstractmethod
+    def append_picture(self, picture: BinaryIO):
+        """Add a picture to the end of Doc"""
+
+    @abstractmethod
     def add_page_break(self):
         """Add page break of Doc"""
+
+    @abstractmethod
+    def add_section(self, horizontal: bool = False):
+        """"""
 
     @classmethod
     @abstractmethod
@@ -88,10 +94,6 @@ class DocxDocumentDAO(DocumentDAOInterface):
         for table in self._document.tables:
             yield table
 
-    def append_part(self, obj: DocxElementProxy):
-        """Append part to Doc"""
-        self._document.element.body.append(obj)
-
     def append_table(self, table: DocxTable):
         """Add Table to the end of Doc"""
         tbl = table._tbl
@@ -105,8 +107,16 @@ class DocxDocumentDAO(DocumentDAOInterface):
     def append_paragraph(self, paragraph: str):
         return self._document.add_paragraph(text=paragraph)
 
+    def append_picture(self, picture: BinaryIO, height: int = 8, width: int = 8):
+        self.get_paragraphs()[0].add_run().add_picture(picture, width=Cm(width), height=Cm(height))
+
     def add_page_break(self):
         self._document.add_page_break()
+
+    def add_section(self, horizontal: bool = False):
+        section = self._document.add_section()
+        if horizontal:
+            section.orientation = WD_ORIENTATION.LANDSCAPE
 
     @classmethod
     def set_cell_style(
