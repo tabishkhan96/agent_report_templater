@@ -121,10 +121,10 @@ class SelfImportReportCreationStrategy(ReportCreationStrategyInterface):
         self._fill_table_with_row_for_container(self.report.transport_units, calibre_table)
         report_doc.append_table(calibre_table)
 
-    def add_conclusion_table(self, report_doc, conclusion_table):
+    def add_conclusion_table(self, report_doc: DocumentDAOInterface, conclusion_table: Table):
         report_doc.append_table(conclusion_table)
 
-    def add_shelf_life_table(self, report_doc, shelf_life_table):
+    def add_shelf_life_table(self, report_doc: DocumentDAOInterface, shelf_life_table: Table):
         self._fill_table_with_row_for_container(self.report.transport_units, shelf_life_table)
         report_doc.append_table(shelf_life_table)
 
@@ -134,7 +134,7 @@ class SelfImportReportCreationStrategy(ReportCreationStrategyInterface):
         )
         report_doc.append_table(executor_table)
 
-    def add_pictures_of_thermographs(self, report_doc):
+    def add_pictures_of_thermographs(self, report_doc: DocumentDAOInterface):
         for TU in self.report.transport_units:
             for thermograph in TU.temperature.thermographs:
                 paragraph = report_doc.append_paragraph(f"Контейнер: {TU.number}\nНомер датчика:{thermograph.number}\n")
