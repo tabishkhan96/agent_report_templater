@@ -14,8 +14,7 @@ from src.repository.models import (
     Table, Row, BaseReport, SelfImportReport, SelfImportOnAutoReport, PickupFromSupplierReport, TransportUnit,
     Container
 )
-from src.repository.template_engine import TemplateEngine
-from src.repository.report_strategies import ReportCreationStrategyInterface, SelfImportReportCreationStrategy
+from src.repository.report_strategies import ReportCreationBaseStrategy, SelfImportReportCreationStrategy
 
 
 # TODO
@@ -39,7 +38,7 @@ class AgentReportRepository:
     def __init__(self, document_dao: Type[DocumentDAOInterface]):
         self.logger: logging.Logger = logging.getLogger("repository")
         self.document_dao: Type[DocumentDAOInterface] = document_dao
-        self.doc_filling_strategies_mapping: dict[Type[BaseModel], Type[ReportCreationStrategyInterface]] = {
+        self.doc_filling_strategies_mapping: dict[Type[BaseModel], Type[ReportCreationBaseStrategy]] = {
             SelfImportReport: SelfImportReportCreationStrategy,
             SelfImportOnAutoReport: ...,
             PickupFromSupplierReport: ...,
@@ -58,11 +57,6 @@ class AgentReportRepository:
         doc = self.document_dao(
             path=f"{settings.REPOSITORY.TEMPLATES_DIR}/{type(report).__name__}/header_template.{settings.DOC_TYPE}"
         )
-        header: Table = next(doc.get_tables(), None)
-        if not header:
-            raise DocumentTemplateCorruptedException('Отсутствует таблица-заголовок')
-
-        self.fill_header_table(report, header)
         self.doc_filling_strategies_mapping[type(report)](self.document_dao, report).execute(doc)
 
         filename: str = f"{report.number}_{report.order}_" \
@@ -76,15 +70,6 @@ class AgentReportRepository:
             f"{settings.REPOSITORY.REPORTS_DIR}/{filename}.{settings.DOC_TYPE}",
             filename=filename,
             media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        )
-
-    def fill_header_table(self, report: BaseReport, header_table: Table):
-        for unit in report.transport_units:
-            unit.cargo_in_english = [
-                settings.VEGETABLES.get(cargo.lower()) or settings.FRUITS.get(cargo.lower(), '') for cargo in unit.cargo
-            ]
-        TemplateEngine.replace_in_table(
-            table=header_table, values=report.header, cell_handler=self.document_dao.set_cell_style
         )
 
     def get_reports(self) -> List[BaseReport]:

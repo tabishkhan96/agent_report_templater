@@ -13,27 +13,36 @@ from src.repository.models import (
 from src.repository.template_engine import TemplateEngine
 
 
-class ReportCreationStrategyInterface(ABC):
+class ReportCreationBaseStrategy(ABC):
     """ Интерфейс стратегий создания отчета. """
     logger: logging.Logger
     document_dao: Type[DocumentDAOInterface]
     report: BaseReport
 
-    @abstractmethod
     def __init__(self, document_dao: Type[DocumentDAOInterface], report: SelfImportReport):
-        ...
+        self.logger: logging.Logger = logging.getLogger("report_strategy")
+        self.document_dao: Type[DocumentDAOInterface] = document_dao
+        self.report: SelfImportReport = report
 
     @abstractmethod
     def execute(self, report_doc: DocumentDAOInterface) -> DocumentDAOInterface:
         ...
 
+    def fill_header_table(self, report_doc: DocumentDAOInterface):
+        header: Table = next(report_doc.get_tables(), None)
+        if not header:
+            raise DocumentTemplateCorruptedException('Отсутствует таблица-заголовок')
+        for unit in self.report.transport_units:
+            unit.cargo_in_english = [
+                settings.VEGETABLES.get(cargo.lower()) or settings.FRUITS.get(cargo.lower(), '') for cargo in unit.cargo
+            ]
+        TemplateEngine.replace_in_table(
+            table=header, values=self.report.header, cell_handler=self.document_dao.set_cell_style
+        )
 
-class SelfImportReportCreationStrategy(ReportCreationStrategyInterface):
+
+class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
     """ Стратегия создания отчета по собственному импорту. """
-    def __init__(self, document_dao: Type[DocumentDAOInterface], report: SelfImportReport):
-        self.logger: logging.Logger = logging.getLogger("report_strategy")
-        self.document_dao: Type[DocumentDAOInterface] = document_dao
-        self.report: SelfImportReport = report
 
     def execute(self, report_doc: DocumentDAOInterface) -> DocumentDAOInterface:
         """
@@ -44,6 +53,7 @@ class SelfImportReportCreationStrategy(ReportCreationStrategyInterface):
         таблиц тальманского счета по каждой ТЕ, таблицы результатов инспекции, замера калибров, заключения, времени
         жизни и данных о исполнителе.
         """
+        self.fill_header_table(report_doc)
         temperature_table_template: Optional[Table] = next(self._get_tables_from_template('temperature_template'), None)
         if not temperature_table_template:
             raise DocumentTemplateCorruptedException('Отсутствует шаблон таблицы температурных данных')
