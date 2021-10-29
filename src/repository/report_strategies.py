@@ -118,7 +118,7 @@ class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
             cargo: [cont for cont in self.report.transport_units if cargo in cont.cargo] for cargo in cargos_in_report
         }
         inspection_result_template_tables: list[Table] = list(inspection_result_template.get_tables())
-        for cargo, containers in containers_by_cargo.values():
+        for cargo, containers in containers_by_cargo.items():
             try:
                 tbl_number: int = cargos_in_inspection_result_template.index(cargo) + 1
             except ValueError:
