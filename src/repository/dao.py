@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import List, Union, Any, Generator, BinaryIO
+from typing import List, Union, Any, Iterator, BinaryIO
 
 import docx
-from docx.document import Document as DocxDocument, ElementProxy as DocxElementProxy
+from docx.document import Document as DocxDocument
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.section import WD_ORIENTATION
 from docx.shape import InlineShape
@@ -30,7 +30,7 @@ class DocumentDAOInterface(ABC):
         """Save document to storage"""
 
     @abstractmethod
-    def get_tables(self) -> Generator[Table]:
+    def get_tables(self) -> Iterator[Table]:
         """Get list of tables of Doc"""
 
     @abstractmethod
@@ -89,7 +89,7 @@ class DocxDocumentDAO(DocumentDAOInterface):
         """Save document to storage"""
         self._document.save(doc_name)
 
-    def get_tables(self) -> Generator[DocxTable]:
+    def get_tables(self) -> Iterator[DocxTable]:
         """Get list of tables of Doc"""
         for table in self._document.tables:
             yield table

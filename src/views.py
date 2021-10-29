@@ -15,7 +15,7 @@ report_api: APIRouter = APIRouter()
 async def create_report(
         report_data: Union[SelfImportReport, SelfImportOnAutoReport, PickupFromSupplierReport] = Body(
             ..., title="Данные для отчета")
-) -> str:
+) -> FileResponse:
     """Создание черновика отчета."""
     return REPOSITORY.create_report(report_data)
 

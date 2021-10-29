@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import logging
 from copy import deepcopy
-from typing import Generator, Optional, Type
+from typing import Generator, Optional, Type, Iterator
 from dynaconf import settings
 
 from src.repository.dao import DocumentDAOInterface
@@ -167,5 +167,5 @@ class SelfImportReportCreationStrategy(ReportCreationStrategyInterface):
             f"{settings.REPOSITORY.TEMPLATES_DIR}/{type(self.report).__name__}/{template_name}.{settings.DOC_TYPE}"
         )
 
-    def _get_tables_from_template(self, template_name: str) -> Generator[Table]:
+    def _get_tables_from_template(self, template_name: str) -> Iterator[Table]:
         return self._get_template_dao(template_name).get_tables()

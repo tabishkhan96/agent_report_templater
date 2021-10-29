@@ -14,6 +14,17 @@ class Cell(ABC):
 
 class Row(ABC):
     """Интерфейс строк таблиц, использующихся в репозитории бизнес-логики"""
+    height: int
+
+    @property
+    @abstractmethod
+    def cells(self) -> List[Cell]:
+        ...
+
+
+class Column(ABC):
+    """Интерфейс столбцов таблиц, использующихся в репозитории бизнес-логики"""
+    width: int
 
     @property
     @abstractmethod
@@ -23,7 +34,7 @@ class Row(ABC):
 
 class Table(ABC):
     """Интерфейс таблиц, использующихся в репозитории бизнес-логики"""
-    columns: list
+    columns: list[Column]
     rows: list[Row]
 
     @abstractmethod
