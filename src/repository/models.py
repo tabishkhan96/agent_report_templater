@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 from typing import List, Optional
 from pydantic import BaseModel, validator
 from fastapi import UploadFile
-import functools
 
 
 class Cell(ABC):
@@ -129,8 +128,6 @@ class BaseReport(BaseModel):
                 if cargo_in_english not in cargos_in_english:
                     cargos_in_english.append(cargo_in_english)
             invoices.append(unit.invoice) if unit.invoice not in invoices else ...
-        cargos = functools.reduce(lambda x, y: x + y, cargos)
-        cargos_in_english = functools.reduce(lambda x, y: x + y, cargos_in_english)
         return {
             'report_number': self.number,
             'place_of_inspection': self.place_of_inspection,
