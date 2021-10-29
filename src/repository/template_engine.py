@@ -7,6 +7,7 @@ from src.repository.models import Table, Cell
 
 class TemplateEngine:
     """Simple template engine for replacing '{{ ... }}' keys in document tables with desired values."""
+    key_pattern: re.Pattern = re.compile('{{ *[A-z0-9_.]+ *}}')
 
     @classmethod
     def replace_text(cls, value: str, values: Union[Dict[str, Any], BaseModel]) -> str:
@@ -19,7 +20,7 @@ class TemplateEngine:
         """
         if isinstance(values, BaseModel):
             values: dict = values.dict()
-        for match in re.finditer('{{ *[A-z0-9_]+ *}}', value):
+        for match in re.finditer(cls.key_pattern, value):
             value = cls._get_nested_attr(values, match.group()[2:-2].strip(), match.group())
             if isinstance(value, (list,  tuple)):
                 value = '\n'.join(value)
@@ -53,7 +54,7 @@ class TemplateEngine:
 
         :return: str
         """
-        match = re.search('{{ *[A-z0-9_]+ *}}', text)
+        match = re.search(cls.key_pattern, text)
         return match.group()[2:-2] if match else None
 
     @classmethod
