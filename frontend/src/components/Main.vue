@@ -39,6 +39,7 @@
         ></PalletsData>
         <br>
         <button v-if="textFinished" @click="createReport" class="btn btn-success">Создать текстовую часть отчета</button>
+        <a href="#" ref="downloadDocument"></a>
         <br>
         <Gallery v-if="attachPhotos" :doc-file-name="docFileName"></Gallery>
       </div>
