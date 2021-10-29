@@ -88,21 +88,25 @@ class AgentReportRepository:
         doc = self.document_dao(f'{settings.REPOSITORY.REPORTS_DIR}/{doc_filename}')
         doc.add_section(horizontal=True)
 
-        images = [image.file for image in images]
+        photos_table_template: Optional[Table] = next(self.document_dao(
+            f"{settings.REPOSITORY.TEMPLATES_DIR}/photos_template.{settings.DOC_TYPE}"
+        ).get_tables(), None)
 
+        if not photos_table_template:
+            raise DocumentTemplateCorruptedException('Отсутствует шаблон таблицы фотографий')
+
+        images: list[BinaryIO] = [image.file for image in images if image.file]
+        photo_frame_width: int = photos_table_template.columns[0].width
+        photo_frame_height: int = photos_table_template.rows[0].height
         for images_chunk in chunked(images, 4):
-            photos_table = deepcopy(
-                self.document_dao(
-                    f"{settings.REPOSITORY.TEMPLATES_DIR}/photos_template.{settings.DOC_TYPE}"
-                ).get_tables()[0]
-            )
-            doc.append_table(photos_table)
-            doc.add_page_break()
-            photos_table = doc.get_tables()[-1]
-
+            photos_table = deepcopy(photos_table_template)
             cells = [cell for n in range(2) for cell in photos_table.row_cells(n)]
             for n, image in enumerate(images_chunk):
-                doc.insert_picture_into_cell(cells[n], image)
+                picture = self.document_dao.insert_picture_into_cell(cells[n], image)
+                picture.width = photo_frame_width
+                picture.height = photo_frame_height
+            doc.append_table(photos_table)
+            doc.add_page_break()
 
         doc.save(f"{settings.REPOSITORY.REPORTS_DIR}/{doc_filename}")
         return FileResponse(
