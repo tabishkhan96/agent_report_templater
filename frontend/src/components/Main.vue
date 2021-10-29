@@ -160,11 +160,18 @@ export default {
     async createReport() {
       let report = this.report;
       console.log(report);
+      let config = {header : {'Content-Type' : 'application/json'}, responseType: 'blob'};
       try {
-        const res = await axios.put('http://0.0.0.0:8080/report/', report);
+        const res = await axios.put('http://0.0.0.0:8080/report/', report, config);
+        let blob = new Blob([res.data], {type: res.headers["content-type"]});
+        let fileName = res.headers["content-disposition"].split("filename*=utf-8''")[1];
+        let link = this.$refs['downloadDocument'];
+        link.href = window.URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+        this.docFileName = fileName;
         this.attachPhotos = true;
         this.message = '';
-        this.docGuid = res.data;
         this.scrollToBottom();
       } catch (error) {
         this.message = "Не удалось создать документ!";
