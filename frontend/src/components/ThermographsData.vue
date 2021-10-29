@@ -38,7 +38,7 @@
                   <td class="col-2">
                     <ul>
                       <li v-for="(thermograph, index) in unit.temperature.thermographs" :key="index">
-                        {{ index+1 }} термограф: <select v-model.lazy="thermograph.worked">
+                        {{ index+1 }} термограф: <select required v-model.lazy="thermograph.worked">
                           <option value="Да/Yes">Работал</option>
                           <option value="Не работал/Did not work">Не работал</option>
                           <option value="Работал некорректно/Did not work correctly">Работал некорректно</option>
@@ -66,9 +66,9 @@
                             <label> Номер датчика: <input required type="text" v-model.lazy="thermograph.number"></label>
                           </td>
                           <td class="col-2">
-                            <label> График:
-                              <input required type="file" accept="image/jpg,image/jpeg,image/png" @change="thermograph.graph = $event.target.files[0]">
-                            </label>
+<!--                            <label> График:-->
+<!--                              <input type="file" accept="image/jpg,image/jpeg,image/png" @change="thermograph.graph = $event.target.files[0]">-->
+<!--                            </label>-->
                           </td>
                           <td class="col-2"> Мин. темп. <input required v-model.lazy="thermograph.min" type="number" step="0.1"></td>
                           <td class="col-2"> Макс. темп. <input required v-model.lazy="thermograph.max" type="number" step="0.1"></td>
