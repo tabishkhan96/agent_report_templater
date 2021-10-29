@@ -59,10 +59,7 @@ class AgentReportRepository:
         )
         self.doc_filling_strategies_mapping[type(report)](self.document_dao, report).execute(doc)
 
-        filename: str = f"{report.number}_{report.order}_" \
-                        f"{'_'.join((tu.supplier for tu in report.transport_units))}_" \
-                        f"{'_'.join(('_'.join(tu.cargo) for tu in report.transport_units))}_" \
-                        f"{'_'.join((tu.number for tu in report.transport_units))}".replace('/', '')
+        filename: str = self.build_report_name(report)
 
         doc.save(f'{settings.REPOSITORY.REPORTS_DIR}/{filename}.{settings.DOC_TYPE}')
         self.logger.info(f'Doc saved to "{settings.REPOSITORY.REPORTS_DIR}/" with name "{filename}".')
@@ -113,3 +110,14 @@ class AgentReportRepository:
             filename=doc_filename,
             media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
+
+    def build_report_name(self, report: BaseReport):
+        suppliers, cargos = [], []
+        for unit in report.transport_units:
+            suppliers.append(unit.supplier) if unit.supplier not in suppliers else ...
+            [cargos.append(cargo) for cargo in unit.cargo if cargo not in cargos]
+
+        filename: str = f"{report.number}_{report.order}_{'_'.join(suppliers)}_{'_'.join(cargos)}_" \
+                        f"{'_'.join((tu.number for tu in report.transport_units))}" \
+                        f".{settings.DOC_TYPE}"
+        return filename.replace('/', '')
