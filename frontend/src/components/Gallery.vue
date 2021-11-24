@@ -42,7 +42,7 @@
         </button>
         <br>
         <a href="#" ref="downloadDocumentWithPictures"></a>
-        <button v-if="docReceived" @click="$refs.getAgain.click()" class="btn btn-success" style="margin: 15px">
+        <button v-if="docReceived" @click="$refs.downloadDocumentWithPictures.click()" class="btn btn-success" style="margin: 15px">
           Скачать повторно
         </button>
       </div>
@@ -137,7 +137,7 @@ export default {
         let res = await axios.patch(`http://0.0.0.0:8080/report/`, data, config);
         let blob = new Blob([res.data], {type: res.headers["content-type"]});
         let fileName = res.headers["content-disposition"].split("filename*=utf-8''")[1];
-        let link = this.$refs['downloadDocumentWithPictures'];
+        let link = this.$refs.downloadDocumentWithPictures;
         link.href = window.URL.createObjectURL(blob);
         link.download = fileName;
         link.click();
