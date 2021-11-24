@@ -60,7 +60,7 @@ class DocumentDAOInterface(ABC):
     @classmethod
     @abstractmethod
     def set_cell_style(
-            self,
+            cls,
             cell: Cell,
             alignment: str = 'center',
             italic: bool = False,
