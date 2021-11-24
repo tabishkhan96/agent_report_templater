@@ -29,7 +29,6 @@ from src.repository.report_strategies import ReportCreationBaseStrategy, SelfImp
 
 
 # TODO растягивать фото если оно меньше чем ячейка и переворачивать вертикальные
-# если разные грузы в контейнере то в заявке будут разные строки
 
 
 class AgentReportRepository:
@@ -59,7 +58,7 @@ class AgentReportRepository:
         )
         self.doc_filling_strategies_mapping[type(report)](self.document_dao, report).execute(doc)
 
-        filename: str = self.build_report_name(report)
+        filename: str = self._build_report_name(report)
 
         doc.save(f'{settings.REPOSITORY.REPORTS_DIR}/{filename}.{settings.DOC_TYPE}')
         self.logger.info(f'Doc saved to "{settings.REPOSITORY.REPORTS_DIR}/" with name "{filename}".')
@@ -115,7 +114,7 @@ class AgentReportRepository:
             media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
 
-    def build_report_name(self, report: BaseReport):
+    def _build_report_name(self, report: BaseReport):
         suppliers, cargos = [], []
         for unit in report.transport_units:
             suppliers.append(unit.supplier) if unit.supplier not in suppliers else ...
