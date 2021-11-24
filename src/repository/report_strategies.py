@@ -40,6 +40,14 @@ class ReportCreationBaseStrategy(ABC):
             table=header, values=self.report.header, cell_handler=self.document_dao.set_cell_style
         )
 
+    def _get_template_dao(self, template_name: str) -> DocumentDAOInterface:
+        return self.document_dao(
+            f"{settings.REPOSITORY.TEMPLATES_DIR}/{type(self.report).__name__}/{template_name}.{settings.DOC_TYPE}"
+        )
+
+    def _get_tables_from_template(self, template_name: str) -> Iterator[Table]:
+        return self._get_template_dao(template_name).get_tables()
+
 
 class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
     """ Стратегия создания отчета по собственному импорту. """
@@ -171,11 +179,3 @@ class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
                 self.document_dao.set_cell_style(cell)
 
         TemplateEngine.replace_in_table(table=table, values=self.report, cell_handler=self.document_dao.set_cell_style)
-
-    def _get_template_dao(self, template_name: str) -> DocumentDAOInterface:
-        return self.document_dao(
-            f"{settings.REPOSITORY.TEMPLATES_DIR}/{type(self.report).__name__}/{template_name}.{settings.DOC_TYPE}"
-        )
-
-    def _get_tables_from_template(self, template_name: str) -> Iterator[Table]:
-        return self._get_template_dao(template_name).get_tables()
