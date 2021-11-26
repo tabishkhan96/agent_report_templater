@@ -23,10 +23,6 @@ class TemplateEngine:
         for match in re.finditer(cls.key_pattern, value):
             value = cls._get_nested_attr(values, match.group()[2:-2].strip(), match.group())
             if isinstance(value, (list,  tuple)):
-                if any(map(lambda v: isinstance(v, dict), value)):
-                    # TODO we have keys like temperature.thermographs which contains dict for each thermograph
-                    # think how to handle it
-                    continue
                 value = '\n'.join(value)
         return str(value)
 
@@ -67,6 +63,8 @@ class TemplateEngine:
             if not part:
                 continue
             if isinstance(obj, (list, tuple)):
+                return tuple(map(lambda o: cls._get_nested_attr(o, part, default=obj), obj))
+            if not hasattr(obj, 'get'):
                 return obj
             obj = obj.get(part)
             if not obj:
