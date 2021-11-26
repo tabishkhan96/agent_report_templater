@@ -67,6 +67,6 @@ class TemplateEngine:
             if not hasattr(obj, 'get'):
                 return obj
             obj = obj.get(part)
-            if not obj:
+            if obj is None:
                 return default
         return obj
