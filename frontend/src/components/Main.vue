@@ -191,6 +191,7 @@ export default {
         this.docFileName = fileName;
         this.attachPhotos = true;
         this.message = '';
+        this.textFinished = false;
         this.scrollToBottom();
       } catch (error) {
         this.message = "Не удалось создать документ!";
