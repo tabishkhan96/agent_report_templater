@@ -5,7 +5,6 @@ import docx
 from docx.document import Document as DocxDocument
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.section import WD_ORIENTATION
-from docx.shape import InlineShape
 from docx.table import Table as DocxTable
 from docx.shared import Cm
 
@@ -38,11 +37,11 @@ class DocumentDAOInterface(ABC):
         """Add Table to the end of Doc"""
 
     @abstractmethod
-    def get_paragraphs(self) -> List:
+    def get_paragraphs(self) -> List[str]:
         """Get list of paragraphs"""
 
     @abstractmethod
-    def append_paragraph(self, paragraph: str):
+    def append_paragraph(self, text: str, italic: bool = False, bold: bool = False, font: str = "Times New Roman"):
         """Add text paragraph to the end of Doc"""
 
     @abstractmethod
@@ -100,12 +99,12 @@ class DocxDocumentDAO(DocumentDAOInterface):
         paragraph = self._document.add_paragraph()
         paragraph._p.addnext(tbl)
 
-    def get_paragraphs(self) -> List:
+    def get_paragraphs(self) -> List[str]:
         """"Get list of paragraphs"""
-        return self._document.paragraphs
+        return [paragraph.text for paragraph in self._document.paragraphs]
 
-    def append_paragraph(self, paragraph: str):
-        return self._document.add_paragraph(text=paragraph)
+    def append_paragraph(self, text: str, italic: bool = False, bold: bool = False, font: str = "Times New Roman"):
+        return self._document.add_paragraph(text=text)
 
     def append_picture(self, picture: BinaryIO, height: int = 8, width: int = 8):
         self.get_paragraphs()[0].add_run().add_picture(picture, width=Cm(width), height=Cm(height))

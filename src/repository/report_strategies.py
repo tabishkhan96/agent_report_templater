@@ -119,7 +119,7 @@ class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
             inspection_result_template: DocumentDAOInterface
     ):
         cargos_in_inspection_result_template = list(
-            filter(lambda pr: pr, map(lambda pr: pr.text.lower().strip(), inspection_result_template.get_paragraphs()))
+            filter(lambda pr: pr, map(lambda pr: pr.lower().strip(), inspection_result_template.get_paragraphs()))
         )
         cargos_in_report: set[str] = set((cargo for TU in self.report.transport_units for cargo in TU.cargo))
         containers_by_cargo: dict[str, list[Container]] = {
@@ -156,9 +156,7 @@ class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
     def add_pictures_of_thermographs(self, report_doc: DocumentDAOInterface):
         for TU in self.report.transport_units:
             for thermograph in TU.temperature.thermographs:
-                paragraph = report_doc.append_paragraph(f"Контейнер: {TU.number}\nНомер датчика:{thermograph.number}\n")
-                paragraph.runs[0].bold = True
-                paragraph.runs[0].font.name = "Times New Roman"
+                report_doc.append_paragraph(f"Контейнер: {TU.number}\nНомер датчика:{thermograph.number}\n", bold=True)
                 if thermograph.graph:
                     report_doc.append_picture(thermograph.graph.file)
             report_doc.add_page_break()
