@@ -7,14 +7,33 @@
         <br>
         <div v-if="message" class="alert">{{ message }}<span class="closebtn" @click="message=''">&times;</span></div>
         <br>
-        <label> Место проведения инспекции <input v-model.lazy="placeOfInspection" size="50"/></label><br>
-        <label> Номер отчета <input v-model.lazy="reportNumber"/></label><br>
-        <label> Дата инспекции
-          <input type="date" v-model.lazy="inspectionDateRow"/> &nbsp;
-          <label v-if="inspectionDateRow"> добавить следующий день: <input type="checkbox" v-model="twoDaysInspection"/> </label>
-        </label>
-        <br>
-        <label> Имя и фамилия инспектора: рус.:<input v-model.lazy="surveyor"/> англ.:<input v-model.lazy="surveyorEng"/></label><br>
+        <div class="container">
+          <div class="row">
+            <table class="table table-hover">
+              <tbody>
+                <tr class="d-flex">
+                  <td style="text-align: left">
+                    <label> Номер отчета <input v-model.lazy="reportNumber"/></label>
+                  </td>
+                  <td style="text-align: right">
+                    <label> Место проведения инспекции <input v-model.lazy="placeOfInspection" size="50"/></label>
+                  </td>
+                </tr>
+                <tr class="d-flex">
+                  <td style="text-align: left">
+                    <label> Дата инспекции
+                      <input type="date" v-model.lazy="inspectionDateRow"/> &nbsp;
+                      <label v-if="inspectionDateRow"> добавить следующий день: <input type="checkbox" v-model="twoDaysInspection"/> </label>
+                    </label>
+                  </td>
+                  <td style="text-align: right">
+                    <label> Имя и фамилия инспектора: рус.:<input v-model.lazy="surveyor"/><br> англ.:<input style="margin-top: 5px" v-model.lazy="surveyorEng"/></label><br>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
         <input type="file"
                ref="file"
                accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

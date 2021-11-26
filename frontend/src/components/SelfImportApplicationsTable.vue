@@ -1,57 +1,53 @@
 <template>
-  <div class="container">
-    <div class="row">
-      <div>
-        <br>
-        <br>
-        <table class="table table-hover">
-          <thead>
-            <tr class="d-flex">
-              <th v-for="key in tableHeadersList"
-                  :key="key"
-                  scope="col"
-                  class="col-2">
-                {{ key }}&nbsp;
-              </th>
-              <th class="col-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-                v-for="application in applicationsListForShow"
-                :key="application.id"
-                class="d-flex"
-                @click="application.selected=!application.selected"
-            >
-              <td class="col-2"><input type="checkbox" v-model="application.selected"></td>
-              <td class="col-2" style="cursor: pointer; text-decoration: underline;">
-                {{ application.transport_unit }}
-              </td>
-              <td class="col-2">{{ application.order }}</td>
-              <td class="col-2">{{ application.supplier }}</td>
-              <td class="col-2">{{ application.BL }}</td>
-              <td class="col-2">{{ application.vessel }}</td>
-              <td class="col-2">{{ application.cargo }}</td>
-              <td class="col-2">{{ application.card }}</td>
-              <td class="col-2">{{ application.cultivar }}</td>
-              <td class="col-2">{{ application.units }}</td>
-              <td class="col-2">{{ application.invoice }}</td>
-              <td class="col-2">{{ application.date.toLocaleDateString() }}</td>
-              <td class="col-2">{{ application.calibre }}</td>
-              <td class="col-2">{{ application.terminal }}</td>
-              <td class="col-2">{{ application.expeditor }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <br>
-        <button
-            v-if="hasSelected && showSubmitButton"
-            @click="continueReport"
-            class="btn btn-success">
-          Составить отчет для выбранных ТЕ
-        </button>
-      </div>
-    </div>
+  <div>
+    <br>
+    <br>
+    <table class="table table-hover">
+      <thead>
+        <tr class="d-flex">
+          <th v-for="key in tableHeadersList"
+              :key="key"
+              scope="col"
+              class="col-2">
+            {{ key }}&nbsp;
+          </th>
+          <th class="col-2"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+            v-for="application in applicationsListForShow"
+            :key="application.id"
+            class="d-flex"
+            @click="application.selected=!application.selected"
+        >
+          <td class="col-2"><input type="checkbox" v-model="application.selected"></td>
+          <td class="col-2" style="cursor: pointer; text-decoration: underline;">
+            {{ application.transport_unit }}
+          </td>
+          <td class="col-2">{{ application.order }}</td>
+          <td class="col-2">{{ application.supplier }}</td>
+          <td class="col-2">{{ application.BL }}</td>
+          <td class="col-2">{{ application.vessel }}</td>
+          <td class="col-2">{{ application.cargo }}</td>
+          <td class="col-2">{{ application.card }}</td>
+          <td class="col-2">{{ application.cultivar }}</td>
+          <td class="col-2">{{ application.units }}</td>
+          <td class="col-2">{{ application.invoice }}</td>
+          <td class="col-2">{{ application.date.toLocaleDateString() }}</td>
+          <td class="col-2">{{ application.calibre }}</td>
+          <td class="col-2">{{ application.terminal }}</td>
+          <td class="col-2">{{ application.expeditor }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <button
+        v-if="hasSelected && showSubmitButton"
+        @click="continueReport"
+        class="btn btn-success">
+      Составить отчет для выбранных ТЕ
+    </button>
   </div>
 </template>
 
