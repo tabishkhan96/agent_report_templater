@@ -60,10 +60,10 @@ class AgentReportRepository:
 
         filename: str = self._build_report_name(report)
 
-        doc.save(f'{settings.REPOSITORY.REPORTS_DIR}/{filename}.{settings.DOC_TYPE}')
+        doc.save(f'{settings.REPOSITORY.REPORTS_DIR}/{filename}')
         self.logger.info(f'Doc saved to "{settings.REPOSITORY.REPORTS_DIR}/" with name "{filename}".')
         return FileResponse(
-            f"{settings.REPOSITORY.REPORTS_DIR}/{filename}.{settings.DOC_TYPE}",
+            f"{settings.REPOSITORY.REPORTS_DIR}/{filename}",
             filename=filename,
             media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
