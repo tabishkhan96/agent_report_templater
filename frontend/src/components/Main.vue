@@ -186,7 +186,7 @@ export default {
         let fileName = res.headers["content-disposition"].split("filename*=utf-8''")[1];
         let link = this.$refs.downloadDocument;
         link.href = window.URL.createObjectURL(blob);
-        link.download = fileName;
+        link.download = decodeURIComponent(fileName);
         link.click();
         this.docFileName = fileName;
         this.attachPhotos = true;
