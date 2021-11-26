@@ -40,7 +40,7 @@
                style="display: none"
                @change="addApplicationFile"
         >
-        <button v-if="inspectionDate" @click="$refs.file.click()" class="btn btn-success">Выберите файл заявки...</button>
+        <button v-if="inspectionDate" @click="$refs.file.click" class="btn btn-success">Выберите файл заявки...</button>
         <br>
         <br>
         <SelfImportApplicationsTable
@@ -58,7 +58,10 @@
         ></PalletsData>
         <br>
         <button v-if="textFinished" @click="createReport" class="btn btn-success">Создать текстовую часть отчета</button>
+        <br>
+        <button v-if="docFileName" @click="$refs.downloadDocument.click" class="btn btn-success">Скачать еще раз</button>
         <a href="#" ref="downloadDocument"></a>
+        <button v-if="docFileName" @click="replaceReport" class="btn btn-primary" style="margin-left: 10px">Отправить измененный отчет</button>
         <br>
         <Gallery v-if="attachPhotos" :doc-file-name="docFileName"></Gallery>
       </div>
