@@ -107,7 +107,7 @@ class DocxDocumentDAO(DocumentDAOInterface):
         return self._document.add_paragraph(text=text)
 
     def append_picture(self, picture: BinaryIO, height: int = 8, width: int = 8):
-        self.get_paragraphs()[0].add_run().add_picture(picture, width=Cm(width), height=Cm(height))
+        self._document.add_paragraph().add_run().add_picture(picture, width=Cm(width), height=Cm(height))
 
     def add_page_break(self):
         self._document.add_page_break()
