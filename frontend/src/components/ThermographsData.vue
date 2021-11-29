@@ -24,7 +24,7 @@
                     :key="unit.number"
                     class="d-flex"
                 >
-                  <td class="col-2">{{ unit.number }}</td>
+                  <td class="col-2"><b>{{ unit.number }}</b></td>
                   <td class="col-2"><input required v-model.lazy="unit.temperature.recommended" type="number" step="0.1"></td>
                   <td class="col-2"><input required v-model.lazy="unit.temperature.pulp.min" type="number" step="0.1"></td>
                   <td class="col-2"><input required v-model.lazy="unit.temperature.pulp.max" type="number" step="0.1"></td>
@@ -56,7 +56,7 @@
                     :key="unit.number"
                     class="d-flex"
                 >
-                  <td v-if="unit.temperature.thermographs.length">{{unit.number}}</td>
+                  <td v-if="unit.temperature.thermographs.length"><b>{{unit.number}}</b></td>
                   <td>
                     <table class="table table-hover">
                       <tbody>

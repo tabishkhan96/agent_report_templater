@@ -23,7 +23,7 @@
                   :key="unit.number"
                   class="d-flex"
               >
-                <td class="col-2">{{ unit.number }}</td>
+                <td class="col-2"><b>{{ unit.number }}</b></td>
                 <td class="col-2">
                   Паллет: <input required v-model.lazy="unit.pallets" type="number"><br>
                   Коробок: <input required v-model.lazy="unit.boxes" type="number">
