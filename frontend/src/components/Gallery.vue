@@ -10,14 +10,24 @@
         </button>
         <br>
         <table style="margin: auto">
-          <tr v-for="chunk in picturesListChunked" :key="chunk" class="d-flex">
-            <td @drop='onDrop($event, chunk[0])'
+          <tr v-for="chunk in picturesListChunked" :key="chunk.id" class="d-flex">
+            <td @drop="onDrop($event, chunk[0])"
                 @dragover.prevent
                 @dragenter.prevent
                 class="picture-cell"
             >
-              <img :src="chunk[0].obj" alt="picture" draggable @dragstart='startDrag($event, chunk[0])'/><br>
-              <span class="deletebtn" @click="picturesList.splice(chunk[0].id, 1)" style="color: black">&times;</span>
+              <img
+                  :src="chunk[0].file"
+                  alt="Picture was not loaded:("
+                  class="picture"
+                  :style="'transform: rotate(' + chunk[0].rotation + 'deg);'"
+                  draggable
+                  @dragstart="startDrag($event, chunk[0])"/>
+              <div class="caption">
+                <span class="manipulation-btn" @click="rotatePictureClockwise(chunk[0].id)">&#8635;</span>
+                <span class="manipulation-btn" @click="rotatePictureCounterClockwise(chunk[0].id)">&#8634;</span>
+                <span class="manipulation-btn" @click="picturesList.splice(chunk[0].id, 1)">&times;</span>
+              </div>
             </td>
             <td v-if="chunk[1]"
                 @drop='onDrop($event, chunk[1])'
@@ -25,8 +35,18 @@
                 @dragenter.prevent
                 class="picture-cell"
             >
-              <img :src="chunk[1].obj" alt="picture" draggable @dragstart='startDrag($event, chunk[1])'/><br>
-              <span class="deletebtn" @click="picturesList.splice(chunk[1].id, 1)">&times;</span>
+              <img
+                  :src="chunk[1].file"
+                  alt="Picture was not loaded:("
+                  class="picture"
+                  :style="'transform: rotate(' + chunk[1].rotation + 'deg);'"
+                  draggable
+                  @dragstart="startDrag($event, chunk[1])"/>
+              <div class="caption">
+                <span class="manipulation-btn" @click="rotatePictureClockwise(chunk[1].id)">&#8635;</span>
+                <span class="manipulation-btn" @click="rotatePictureCounterClockwise(chunk[1].id)">&#8634;</span>
+                <span class="manipulation-btn" @click="picturesList.splice(chunk[1].id, 1)">&times;</span>
+              </div>
             </td>
           </tr>
         </table>
@@ -92,7 +112,7 @@ export default {
         let reader = new FileReader();
         reader.readAsDataURL(files[i]);
         reader.onload = event => {
-            this.picturesList.push({id: i, obj: event.target.result, file: files[i]});
+            this.picturesList.push({id: i, file: event.target.result, rotation: 0});
         };
       }
     },
@@ -148,14 +168,27 @@ export default {
         // eslint-disable-next-line
         console.error(error);
       }
+    },
+    rotatePictureClockwise(id) {
+      this.picturesList[id].rotation += 90;
+      if (this.picturesList[id].rotation >= 360) {
+        this.picturesList[id].rotation -= 360;
+      }
+    },
+    rotatePictureCounterClockwise(id) {
+      this.picturesList[id].rotation -= 90;
+      if (this.picturesList[id].rotation < 0) {
+        this.picturesList[id].rotation += 360;
+      }
     }
   },
 };
 </script>
 
 <style scoped>
-  .deletebtn {
-    margin-left: 15px;
+  .manipulation-btn {
+    margin: 0 5px;
+    vertical-align: middle;
     color: black;
     font-size: 22px;
     line-height: 20px;
@@ -163,9 +196,15 @@ export default {
     transition: 0.3s;
   }
 
+  .picture {
+    width: 80%;
+  }
+
   .picture-cell {
-    padding: 5px;
-    box-shadow: 0 0 9px 0 rgba(0,0,0,0.1);
+    overflow: hidden;
+    width: 50%;
+    padding: 10px;
+    box-shadow: 0 0 10px 0 rgba(0,0,0,0.1);
     border-radius: 3px;
   }
 
@@ -191,5 +230,20 @@ export default {
   /* When moving the mouse over the close button */
   .closebtn:hover {
     color: black;
+  }
+
+  .caption {
+    display: block;
+    width: 120px;
+    left: 40%;
+    right: 40%;
+    padding: 10px;
+    position: relative;
+    background-color: white;
+    border-radius: 5px;
+    opacity: .7;
+    bottom: 50px;
+    z-index: 3;
+    text-align: center;
   }
 </style>
