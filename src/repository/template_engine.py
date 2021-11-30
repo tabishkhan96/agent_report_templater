@@ -22,7 +22,7 @@ class TemplateEngine:
             values: dict = values.dict()
         for match in re.finditer(cls.key_pattern, value):
             value = cls._get_nested_attr(values, match.group()[2:-2].strip(), match.group())
-            if isinstance(value, (list,  tuple)):
+            if isinstance(value, (list, tuple, set)):
                 value = '\n'.join(value)
         return str(value)
 
@@ -62,7 +62,7 @@ class TemplateEngine:
         for part in attribute_path.split('.'):
             if not part:
                 continue
-            if isinstance(obj, (list, tuple)):
+            if isinstance(obj, (list, tuple, set)):
                 return tuple(map(lambda o: cls._get_nested_attr(o, part, default=obj), obj))
             if not hasattr(obj, 'get'):
                 return obj
