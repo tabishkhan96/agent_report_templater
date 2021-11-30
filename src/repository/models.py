@@ -1,8 +1,10 @@
 import datetime
+import re
 from abc import ABC, abstractmethod
+from io import BytesIO
+from base64 import b64decode
 from typing import List, Optional
 from pydantic import BaseModel, validator
-from fastapi import UploadFile
 
 
 class Cell(ABC):
@@ -49,6 +51,20 @@ class Table(ABC):
         ...
 
 
+class Photo(BaseModel):
+    id: int
+    file: BytesIO
+    rotation: int = 0
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    @validator('file', pre=True)
+    def decode_base64_string_to_bytes(cls, value):
+        value = re.findall("data:image/\w+;base64,(.*)", value)
+        return BytesIO(b64decode(value[0]) if value else b'')
+
+
 class ThermometerBoundaries(BaseModel):
     min: float = 0.0
     max: float = 0.0
@@ -56,7 +72,7 @@ class ThermometerBoundaries(BaseModel):
 
 class ThermographData(ThermometerBoundaries):
     number: str
-    graph: Optional[UploadFile]
+    graph: Optional[Photo]
     worked: str
 
 
@@ -85,6 +101,7 @@ class TransportUnit(BaseModel):
     cargo_damage: float = 0
     empty_boxes: int = 0
     not_full_boxes: int = 0
+    photos: list[Photo] = []
 
     @validator("cargo", allow_reuse=True)
     def strip_cargo(cls, value: List[str]):

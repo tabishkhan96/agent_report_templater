@@ -4,6 +4,7 @@ from typing import List, Union, Any, Iterator, BinaryIO
 import docx
 from docx.document import Document as DocxDocument
 from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.enum.section import WD_ORIENTATION
 from docx.table import Table as DocxTable
 from docx.shared import Cm
@@ -33,7 +34,7 @@ class DocumentDAOInterface(ABC):
         """Get list of tables of Doc"""
 
     @abstractmethod
-    def append_table(self, table: Table):
+    def append_table(self, table: Table) -> Table:
         """Add Table to the end of Doc"""
 
     @abstractmethod
@@ -93,11 +94,12 @@ class DocxDocumentDAO(DocumentDAOInterface):
         for table in self._document.tables:
             yield table
 
-    def append_table(self, table: DocxTable):
+    def append_table(self, table: DocxTable) -> Table:
         """Add Table to the end of Doc"""
         tbl = table._tbl
         paragraph = self._document.add_paragraph()
         paragraph._p.addnext(tbl)
+        return self._document.tables[-1]
 
     def get_paragraphs(self) -> List[str]:
         """"Get list of paragraphs"""
@@ -116,6 +118,7 @@ class DocxDocumentDAO(DocumentDAOInterface):
         section = self._document.add_section()
         if horizontal:
             section.orientation = WD_ORIENTATION.LANDSCAPE
+            section.page_width, section.page_height = section.page_height, section.page_width
 
     @classmethod
     def set_cell_style(

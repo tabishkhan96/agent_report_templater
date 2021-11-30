@@ -28,7 +28,8 @@ const store = createStore({
         damaged_boxes: 0,
         cargo_damage: 0,
         empty_boxes: 0,
-        not_full_boxes: 0
+        not_full_boxes: 0,
+        photos: []
       },
       temperatureDataModel: {
         recommended: 0.0,

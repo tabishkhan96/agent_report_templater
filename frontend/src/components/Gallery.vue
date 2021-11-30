@@ -10,7 +10,7 @@
         </button>
         <br>
         <table style="margin: auto">
-          <tr v-for="chunk in picturesListChunked" :key="chunk.id" class="d-flex">
+          <tr v-for="chunk in picturesListChunked" :key="chunk" class="d-flex">
             <td @drop="onDrop($event, chunk[0])"
                 @dragover.prevent
                 @dragenter.prevent
@@ -50,28 +50,22 @@
             </td>
           </tr>
         </table>
-        <button v-if="photosSet" @click="picturesList.reverse();recountPictureList()" class="btn" style="margin: 15px">
+        <button v-if="photosSet" @click="picturesList.reverse();recountPictureList()" class="btn btn-secondary" style="margin: 15px">
           Обратный порядок
         </button>
-        <button v-if="photosSet" @click="deleteAll" class="btn" style="margin: 15px">
+        <button v-if="photosSet" @click="savePhotos" class="btn btn-success" style="margin: 15px">
+          Сохранить
+        </button>
+        <button v-if="photosSet" @click="deleteAll" class="btn btn-warning" style="margin: 15px">
           Удалить все
         </button>
         <br>
-        <button v-if="photosSet && !docReceived" @click="uploadPhotos" class="btn btn-success">
-          Отправить
-        </button>
-        <br>
-        <a href="#" ref="downloadDocumentWithPictures"></a>
-        <button v-if="docReceived" @click="$refs.downloadDocumentWithPictures.click()" class="btn btn-success" style="margin: 15px">
-          Скачать повторно
-        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
 
 export default {
   data() {
@@ -79,11 +73,11 @@ export default {
       photosSet: false,
       picturesList: [],
       pictureTypes: ['image/jpg','image/jpeg','image/png'],
-      docReceived: false,
+      report: this.$store.state.report,
       message: ''
     };
   },
-  props: ["docFileName"],
+  props: ["transportUnitNumber"],
   computed: {
     picturesListChunked() {
       let result = [];
@@ -124,6 +118,7 @@ export default {
     deleteAll() {
       if (confirm("Удалить все фотографии?")) {
         this.picturesList = [];
+        this.savePhotos();
         this.photosSet = false;
       }
     },
@@ -146,28 +141,10 @@ export default {
       }
       this.recountPictureList();
     },
-    async uploadPhotos () {
-      let data = new FormData();
-      data.append('filename', this.docFileName)
-      for (let i = 0; i < this.picturesList.length; i++ ) {
-         data.append('pictures', this.picturesList[i].file);
-      }
-      let config = {header : {'Content-Type' : 'multipart/form-data'}, responseType: 'blob'};
-      try {
-        let res = await axios.patch(`http://0.0.0.0:8080/report/`, data, config);
-        let blob = new Blob([res.data], {type: res.headers["content-type"]});
-        let fileName = res.headers["content-disposition"].split("filename*=utf-8''")[1];
-        let link = this.$refs.downloadDocumentWithPictures;
-        link.href = window.URL.createObjectURL(blob);
-        link.download = fileName;
-        link.click();
-        this.photosSet = false;
-        this.docReceived = true;
-      } catch (error) {
-        this.message = "Не удалось добавить фотографии!";
-        // eslint-disable-next-line
-        console.error(error);
-      }
+    savePhotos() {
+      let transport_unit = this.report.transport_units.filter(unit => unit.number === this.transportUnitNumber)[0];
+      transport_unit.photos = [...this.picturesList];
+      this.$store.commit('setReport', this.report);
     },
     rotatePictureClockwise(id) {
       this.picturesList[id].rotation += 90;

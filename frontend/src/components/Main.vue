@@ -58,12 +58,34 @@
         ></PalletsData>
         <br>
         <button v-if="textFinished" @click="createReport" class="btn btn-success">Создать текстовую часть отчета</button>
+        <input type="file"
+               ref="editedReportFile"
+               accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+               style="display: none"
+               @change="replaceReport"
+        >
+        <button v-if="attachPhotos" @click="$refs.editedReportFile.click" class="btn btn-primary" style="margin-left: 10px">
+          Отправить измененный отчет
+        </button>
         <br>
-        <button v-if="docFileName" @click="$refs.downloadDocument.click" class="btn btn-success">Скачать еще раз</button>
+        <div v-if="attachPhotos">
+          <div v-for="transport_unit in report.transport_units" :key="transport_unit.number">
+            <h3> {{ transport_unit.number }} </h3>
+            <Gallery :transport-unit-number="transport_unit.number"></Gallery>
+          </div>
+        </div>
+        <button v-if="attachPhotos" @click="sendReportWithPhotos" class="btn btn-success" style="margin: 10px">
+          Отправить фотографии
+        </button>
+        <br>
         <a href="#" ref="downloadDocument"></a>
-        <button v-if="docFileName" @click="replaceReport" class="btn btn-primary" style="margin-left: 10px">Отправить измененный отчет</button>
+        <button v-if="docFileName" @click="$refs.downloadDocument.click" class="btn btn-info" style="margin: 10px">
+          Скачать повторно
+        </button>
         <br>
-        <Gallery v-if="attachPhotos" :doc-file-name="docFileName"></Gallery>
+        <button v-if="reportFinished" @click="resetGlobalVariables(true)" class="btn btn-success" style="margin: 10px">
+          Вернуться в начало
+        </button>
       </div>
     </div>
   </div>
@@ -94,6 +116,7 @@ export default {
       textFinished: false,
       attachPhotos: false,
       docFileName: '',
+      reportFinished: false,
       message: ''
     };
   },
@@ -159,13 +182,13 @@ export default {
     },
     resetGlobalVariables() {
       this.attachPhotos = false;
-      this.photosSet = false;
-      this.docReceived = false;
       this.selfImportApplication = false;
       this.showTable = true;
       this.applicationsSelected = false;
       this.textFinished = false;
       this.thermalDataSet = false;
+      this.docFileName = '';
+      this.reportFinished = false;
       this.dropReport();
     },
     toThermalData() {
@@ -180,11 +203,9 @@ export default {
       setTimeout(window.scrollTo, 100, 0, document.body.scrollHeight);
     },
     async createReport() {
-      let report = this.report;
-      console.log(report);
       let config = {header : {'Content-Type' : 'application/json'}, responseType: 'blob'};
       try {
-        const res = await axios.put('http://0.0.0.0:8080/report/', report, config);
+        const res = await axios.put('http://0.0.0.0:8080/report/', this.report, config);
         let blob = new Blob([res.data], {type: res.headers["content-type"]});
         let fileName = res.headers["content-disposition"].split("filename*=utf-8''")[1];
         let link = this.$refs.downloadDocument;
@@ -202,6 +223,26 @@ export default {
         console.error(error);
       }
     },
+    async replaceReport() {
+
+    },
+    async sendReportWithPhotos() {
+      console.log(this.report);
+      let config = {header : {'Content-Type' : 'application/json'}, responseType: 'blob'};
+      try {
+        const res = await axios.patch('http://0.0.0.0:8080/report/', this.report, config);
+        let blob = new Blob([res.data], {type: res.headers["content-type"]});
+        let link = this.$refs.downloadDocument;
+        link.href = window.URL.createObjectURL(blob);
+        link.click();
+        this.attachPhotos = false;
+        this.reportFinished = true;
+      } catch (error) {
+        this.message = "Не удалось добавить фотографии!";
+        // eslint-disable-next-line
+        console.error(error);
+      }
+    }
   },
 };
 </script>

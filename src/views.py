@@ -27,10 +27,12 @@ async def reports_in_progress() -> List[BaseReport]:
     return REPOSITORY.get_reports()
 
 
-@report_api.patch("/", name="Добавить фотографии к отчету")
+
+@report_api.patch("/", name="")
 async def add_photos(
-        filename: str = Body(..., description="GUID черновика отчета", min_length=32, max_length=32),
-        pictures: List[UploadFile] = File(..., description="Файлы фотографий")
+        report_data: Union[SelfImportReport,
+                           SelfImportOnAutoReport,
+                           PickupFromSupplierReport] = Body(..., title="Модель отчета c фотобазой транспортных единиц")
 ) -> FileResponse:
     """Добавить фотографии к отчету."""
-    return REPOSITORY.add_pictures(filename, pictures)
+    return REPOSITORY.add_pictures(report_data)

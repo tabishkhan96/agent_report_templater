@@ -1,18 +1,21 @@
 import logging
 import os
 from copy import deepcopy
-from typing import List, Type, BinaryIO, Optional
+from io import BytesIO
+from typing import List, Type, BinaryIO, Optional, Union
 from fastapi import UploadFile
 from fastapi.responses import FileResponse
 from dynaconf import settings
 from more_itertools import chunked
 from pydantic import BaseModel
+from PIL import Image
+from urllib.parse import unquote
 
 from src.repository.dao import DocumentDAOInterface
 from src.repository.exceptions import DraftDocumentNotFoundException, DocumentTemplateCorruptedException
 from src.repository.models import (
     Table, Row, BaseReport, SelfImportReport, SelfImportOnAutoReport, PickupFromSupplierReport, TransportUnit,
-    Container
+    Container, Photo
 )
 from src.repository.report_strategies import ReportCreationBaseStrategy, SelfImportReportCreationStrategy
 
@@ -71,41 +74,35 @@ class AgentReportRepository:
     def get_reports(self) -> List[BaseReport]:
         raise NotImplemented
 
-    def add_pictures(self, doc_filename: str, images: List[UploadFile]) -> FileResponse:
+    def add_pictures(self, report: BaseReport) -> FileResponse:
         """
         Добавление фотографий к отчету.
 
         Фотографии добавляются в таблице 2 на 2, по одной таблице на страницу отчета.
 
-        :param doc_filename: имя файла отчета
-        :param images: фотографии
+        :param report:
         :return FileResponse: файл отчета
         """
+        doc_filename: str = self._build_report_name(report)
         if doc_filename not in os.listdir(settings.REPOSITORY.REPORTS_DIR):
-            raise DraftDocumentNotFoundException
+            raise DraftDocumentNotFoundException(f"Искомое имя: {doc_filename}")
 
         doc = self.document_dao(f'{settings.REPOSITORY.REPORTS_DIR}/{doc_filename}')
         doc.add_section(horizontal=True)
 
         photos_table_template: Optional[Table] = next(self.document_dao(
-            f"{settings.REPOSITORY.TEMPLATES_DIR}/photos_template.{settings.DOC_TYPE}"
+            f"{settings.REPOSITORY.TEMPLATES_DIR}/{type(report).__name__}/photos_template.{settings.DOC_TYPE}"
         ).get_tables(), None)
 
         if not photos_table_template:
             raise DocumentTemplateCorruptedException('Отсутствует шаблон таблицы фотографий')
 
-        images: list[BinaryIO] = [image.file for image in images if image.file]
-        photo_frame_width: int = photos_table_template.columns[0].width
-        photo_frame_height: int = photos_table_template.rows[0].height
-        for images_chunk in chunked(images, 4):
-            photos_table = deepcopy(photos_table_template)
-            cells = [cell for n in range(2) for cell in photos_table.row_cells(n)]
-            for n, image in enumerate(images_chunk):
-                picture = self.document_dao.insert_picture_into_cell(cells[n], image)
-                picture.width = photo_frame_width
-                picture.height = photo_frame_height
-            doc.append_table(photos_table)
-            doc.add_page_break()
+        for transport_unit in report.transport_units:
+            doc.append_paragraph(transport_unit.number)
+            for images_chunk in chunked(transport_unit.photos, 4):
+                photos_table = doc.append_table(deepcopy(photos_table_template))
+                self._fill_pictures_table(photos_table, images_chunk)
+                doc.add_page_break()
 
         doc.save(f"{settings.REPOSITORY.REPORTS_DIR}/{doc_filename}")
         return FileResponse(
@@ -124,3 +121,14 @@ class AgentReportRepository:
                         f"{'_'.join((tu.number for tu in report.transport_units))}" \
                         f".{settings.DOC_TYPE}"
         return filename.replace('/', '')
+
+    def _fill_pictures_table(self, photos_table: Table, photos: list[Photo]) -> Table:
+        images: list[Image] = [Image.open(photo.file).rotate(360 - photo.rotation) for photo in photos if photo.file]
+        photo_frame_ratio: float = photos_table.columns[0].width / photos_table.rows[0].height
+        map(lambda img: img.resize((image.size[1] * photo_frame_ratio, image.size[1])), images)
+        cells = [cell for n in range(2) for cell in photos_table.row_cells(n)]
+        for n, image in enumerate(images):
+            img_byte_array = BytesIO()
+            image.save(img_byte_array, format='PNG')
+            self.document_dao.insert_picture_into_cell(cells[n], img_byte_array)
+        return photos_table
