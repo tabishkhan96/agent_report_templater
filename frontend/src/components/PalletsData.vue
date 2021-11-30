@@ -58,6 +58,7 @@
                 class="btn btn-success">
               Сохранить паллеты/короба
             </button>
+            <p v-if="editable" class="text-sm-center"><i> Внимание: вы не сможете изменить данные после сохранения! </i></p>
           </fieldset>
         </form>
       </div>

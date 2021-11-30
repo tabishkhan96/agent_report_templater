@@ -1,93 +1,89 @@
 <template>
-  <div class="container">
-    <div class="row">
-      <div>
-        <h1> Сюрвейерские отчеты </h1>
-        <hr>
-        <br>
-        <div v-if="message" class="alert">{{ message }}<span class="closebtn" @click="message=''">&times;</span></div>
-        <br>
-        <div class="container">
-          <div class="row">
-            <table class="table table-hover">
-              <tbody>
-                <tr class="d-flex">
-                  <td style="text-align: left">
-                    <label> Номер отчета <input v-model.lazy="reportNumber"/></label>
-                  </td>
-                  <td style="text-align: right">
-                    <label> Место проведения инспекции <input v-model.lazy="placeOfInspection" size="50"/></label>
-                  </td>
-                </tr>
-                <tr class="d-flex">
-                  <td style="text-align: left">
-                    <label> Дата инспекции
-                      <input type="date" v-model.lazy="inspectionDateRow"/> &nbsp;
-                      <label v-if="inspectionDateRow"> добавить следующий день: <input type="checkbox" v-model="twoDaysInspection"/> </label>
-                    </label>
-                  </td>
-                  <td style="text-align: right">
-                    <label> Имя и фамилия инспектора: рус.:<input v-model.lazy="surveyor"/><br> англ.:<input style="margin-top: 5px" v-model.lazy="surveyorEng"/></label><br>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <input type="file"
-               ref="file"
-               accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-               style="display: none"
-               @change="addApplicationFile"
-        >
-        <button v-if="inspectionDate" @click="$refs.file.click" class="btn btn-success">Выберите файл заявки...</button>
-        <br>
-        <br>
-        <SelfImportApplicationsTable
-            v-if="selfImportApplication && showTable"
-            :applications-json-list="applicationsList"
-            @ApplicationsSelectedEvent="toThermalData"
-        ></SelfImportApplicationsTable>
-        <ThermographsData
-            v-if="applicationsSelected"
-            @ThermalDataInsertedEvent="toPalletsData"
-        ></ThermographsData>
-        <PalletsData
-          v-if="thermalDataSet"
-          @PalletDataInsertedEvent="textFinished=true;"
-        ></PalletsData>
-        <br>
-        <button v-if="textFinished" @click="createReport" class="btn btn-success">Создать текстовую часть отчета</button>
-        <input type="file"
-               ref="editedReportFile"
-               accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-               style="display: none"
-               @change="replaceReport"
-        >
-        <button v-if="attachPhotos" @click="$refs.editedReportFile.click" class="btn btn-primary" style="margin-left: 10px">
-          Отправить измененный отчет
-        </button>
-        <br>
-        <div v-if="attachPhotos">
-          <div v-for="transport_unit in report.transport_units" :key="transport_unit.number">
-            <h3> {{ transport_unit.number }} </h3>
-            <Gallery :transport-unit-number="transport_unit.number"></Gallery>
-          </div>
-        </div>
-        <button v-if="attachPhotos" @click="sendReportWithPhotos" class="btn btn-success" style="margin: 10px">
-          Отправить фотографии
-        </button>
-        <br>
-        <a href="#" ref="downloadDocument"></a>
-        <button v-if="docFileName" @click="$refs.downloadDocument.click" class="btn btn-info" style="margin: 10px">
-          Скачать повторно
-        </button>
-        <br>
-        <button v-if="reportFinished" @click="resetGlobalVariables(true)" class="btn btn-success" style="margin: 10px">
-          Вернуться в начало
-        </button>
+  <div>
+    <h1> Сюрвейерские отчеты </h1>
+    <hr>
+    <br>
+    <div v-if="message" class="alert">{{ message }}<span class="closebtn" @click="message=''">&times;</span></div>
+    <br>
+    <div class="container">
+      <div class="row">
+        <table class="table table-hover">
+          <tbody>
+            <tr class="d-flex">
+              <td style="text-align: left">
+                <label> Номер отчета <input v-model.lazy="reportNumber"/></label>
+              </td>
+              <td style="text-align: right">
+                <label> Место проведения инспекции <input v-model.lazy="placeOfInspection" size="50"/></label>
+              </td>
+            </tr>
+            <tr class="d-flex">
+              <td style="text-align: left">
+                <label> Дата инспекции
+                  <input type="date" v-model.lazy="inspectionDateRow"/> &nbsp;
+                  <label v-if="inspectionDateRow"> добавить следующий день: <input type="checkbox" v-model="twoDaysInspection"/> </label>
+                </label>
+              </td>
+              <td style="text-align: right">
+                <label> Имя и фамилия инспектора: рус.:<input v-model.lazy="surveyor"/><br> англ.:<input style="margin-top: 5px" v-model.lazy="surveyorEng"/></label>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
+    <input type="file"
+           ref="applicationFile"
+           accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+           style="display: none"
+           @change="addApplicationFile"
+    >
+    <button v-if="inspectionDate" @click="$refs.applicationFile.click" class="btn btn-success">Выберите файл заявки...</button>
+    <br>
+    <br>
+    <SelfImportApplicationsTable
+        v-if="selfImportApplication && showTable"
+        :applications-json-list="applicationsList"
+        @ApplicationsSelectedEvent="toThermalData"
+    ></SelfImportApplicationsTable>
+    <ThermographsData
+        v-if="applicationsSelected"
+        @ThermalDataInsertedEvent="toPalletsData"
+    ></ThermographsData>
+    <PalletsData
+      v-if="thermalDataSet"
+      @PalletDataInsertedEvent="textFinished=true;"
+    ></PalletsData>
+    <br>
+    <button v-if="textFinished" @click="createReport" class="btn btn-success">Создать текстовую часть отчета</button>
+    <input type="file"
+           ref="editedReportFile"
+           accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+           style="display: none"
+           @change="replaceReport"
+    >
+    <button v-if="attachPhotos" @click="$refs.editedReportFile.click" class="btn btn-primary" style="margin-left: 10px">
+      Отправить измененный отчет
+    </button>
+    <br>
+    <div v-if="attachPhotos">
+      <div v-for="transport_unit in report.transport_units" :key="transport_unit.number">
+        <h3> {{ transport_unit.number }} </h3>
+        <Gallery :transport-unit-number="transport_unit.number"></Gallery>
+      </div>
+    </div>
+    <button v-if="attachPhotos" @click="sendReportWithPhotos" class="btn btn-success" style="margin: 10px">
+      Отправить фотографии
+    </button>
+    <br>
+    <a href="#" ref="downloadDocument"></a>
+    <button v-if="docFileName" @click="$refs.downloadDocument.click" class="btn btn-info" style="margin: 10px">
+      Скачать повторно
+    </button>
+    <br>
+    <button v-if="reportFinished" @click="resetGlobalVariables(true)" class="btn btn-success" style="margin: 10px">
+      Вернуться в начало
+    </button>
   </div>
 </template>
 
@@ -180,7 +176,11 @@ export default {
     dropReport() {
       this.$store.commit('dropReport')
     },
-    resetGlobalVariables() {
+    resetGlobalVariables(all=false) {
+      if (all) {
+        this.inspectionDateRow = '';
+        this.twoDaysInspection = false;
+      }
       this.attachPhotos = false;
       this.selfImportApplication = false;
       this.showTable = true;
