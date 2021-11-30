@@ -112,10 +112,8 @@ class AgentReportRepository:
         )
 
     def _build_report_name(self, report: BaseReport):
-        suppliers, cargos = [], []
-        for unit in report.transport_units:
-            suppliers.append(unit.supplier) if unit.supplier not in suppliers else ...
-            [cargos.append(cargo) for cargo in unit.cargo if cargo not in cargos]
+        suppliers: set[str] = {unit.supplier for unit in report.transport_units}
+        cargos: set[str] = {cargo for unit in report.transport_units for cargo in unit.cargo}
 
         filename: str = f"{report.number}_{report.order}_{'_'.join(suppliers)}_{'_'.join(cargos)}_" \
                         f"{'_'.join((tu.number for tu in report.transport_units))}" \

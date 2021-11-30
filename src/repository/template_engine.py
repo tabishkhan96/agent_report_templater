@@ -1,5 +1,5 @@
 import re
-from typing import Dict, Any, Union, Callable, Optional
+from typing import Dict, Any, Union, Callable, Optional, Final
 from pydantic import BaseModel
 
 from src.repository.models import Table, Cell
@@ -7,7 +7,7 @@ from src.repository.models import Table, Cell
 
 class TemplateEngine:
     """Simple template engine for replacing '{{ ... }}' keys in document tables with desired values."""
-    key_pattern: re.Pattern = re.compile('{{ *[A-z0-9_.]+ *}}')
+    key_pattern: Final[re.Pattern] = re.compile('{{ *[A-z0-9_.]+ *}}')
 
     @classmethod
     def replace_text(cls, value: str, values: Union[Dict[str, Any], BaseModel]) -> str:
