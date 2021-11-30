@@ -156,7 +156,7 @@ class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
     def add_pictures_of_thermographs(self, report_doc: DocumentDAOInterface):
         for TU in self.report.transport_units:
             for thermograph in TU.temperature.thermographs:
-                report_doc.append_paragraph(f"Контейнер: {TU.number}\nНомер датчика:{thermograph.number}\n", bold=True)
+                report_doc.append_paragraph(f"Контейнер: {TU.number}\nНомер датчика:{thermograph.number}\n")
                 if thermograph.graph:
                     report_doc.append_picture(thermograph.graph.file)
             report_doc.add_page_break()
