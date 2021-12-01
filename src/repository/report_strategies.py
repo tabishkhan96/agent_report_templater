@@ -4,31 +4,28 @@ from copy import deepcopy
 from typing import Generator, Optional, Type, Iterator
 from dynaconf import settings
 
-from src.repository.dao import DocumentDAOInterface
-from src.repository.exceptions import DocumentTemplateCorruptedException
-from src.repository.models import (
-    Table, Row, BaseReport, SelfImportReport, SelfImportOnAutoReport, PickupFromSupplierReport, TransportUnit,
-    Container
-)
-from src.repository.template_engine import TemplateEngine
+from .document_daos import AbstractDocumentDAO, Table, Row
+from .exceptions import DocumentTemplateCorruptedException
+from .models import BaseReport, SelfImportReport, Container
+from .template_engine import TemplateEngine
 
 
 class ReportCreationBaseStrategy(ABC):
     """ Интерфейс стратегий создания отчета. """
     logger: logging.Logger
-    document_dao: Type[DocumentDAOInterface]
+    document_dao: Type[AbstractDocumentDAO]
     report: BaseReport
 
-    def __init__(self, document_dao: Type[DocumentDAOInterface], report: SelfImportReport):
+    def __init__(self, document_dao: Type[AbstractDocumentDAO], report: SelfImportReport):
         self.logger: logging.Logger = logging.getLogger("report_strategy")
-        self.document_dao: Type[DocumentDAOInterface] = document_dao
+        self.document_dao: Type[AbstractDocumentDAO] = document_dao
         self.report: SelfImportReport = report
 
     @abstractmethod
-    def execute(self, report_doc: DocumentDAOInterface) -> DocumentDAOInterface:
+    def execute(self, report_doc: AbstractDocumentDAO) -> AbstractDocumentDAO:
         ...
 
-    def fill_header_table(self, report_doc: DocumentDAOInterface):
+    def fill_header_table(self, report_doc: AbstractDocumentDAO):
         header: Table = next(report_doc.get_tables(), None)
         if not header:
             raise DocumentTemplateCorruptedException('Отсутствует таблица-заголовок')
@@ -40,7 +37,7 @@ class ReportCreationBaseStrategy(ABC):
             table=header, values=self.report.header, cell_handler=self.document_dao.set_cell_style
         )
 
-    def _get_template_dao(self, template_name: str) -> DocumentDAOInterface:
+    def _get_template_dao(self, template_name: str) -> AbstractDocumentDAO:
         return self.document_dao(
             f"{settings.REPOSITORY.TEMPLATES_DIR}/{type(self.report).__name__}/{template_name}.{settings.DOC_TYPE}"
         )
@@ -52,7 +49,7 @@ class ReportCreationBaseStrategy(ABC):
 class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
     """ Стратегия создания отчета по собственному импорту. """
 
-    def execute(self, report_doc: DocumentDAOInterface) -> DocumentDAOInterface:
+    def execute(self, report_doc: AbstractDocumentDAO) -> AbstractDocumentDAO:
         """
         Создание отчета для собственного импорта.
 
@@ -94,12 +91,12 @@ class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
         self.add_pictures_of_thermographs(report_doc)
         return report_doc
 
-    def add_temperature_table(self, report_doc: DocumentDAOInterface, temperature_table: Table):
+    def add_temperature_table(self, report_doc: AbstractDocumentDAO, temperature_table: Table):
         self._fill_table_with_row_for_container(self.report.transport_units, temperature_table)
         report_doc.append_table(temperature_table)
 
     def add_tally_account_and_pallets_tables(
-            self, report_doc: DocumentDAOInterface, pallets_table_template: Table, tally_account_table_template: Table
+            self, report_doc: AbstractDocumentDAO, pallets_table_template: Table, tally_account_table_template: Table
     ):
         for container in self.report.transport_units:
             pallets_table = deepcopy(pallets_table_template)
@@ -115,8 +112,8 @@ class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
 
     def add_inspection_result_tables(
             self,
-            report_doc: DocumentDAOInterface,
-            inspection_result_template: DocumentDAOInterface
+            report_doc: AbstractDocumentDAO,
+            inspection_result_template: AbstractDocumentDAO
     ):
         cargos_in_inspection_result_template = list(
             filter(lambda pr: pr, map(lambda pr: pr.lower().strip(), inspection_result_template.get_paragraphs()))
@@ -136,24 +133,24 @@ class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
             self._fill_table_with_row_for_container(containers, table)
             report_doc.append_table(table)
 
-    def add_calibre_table(self, report_doc: DocumentDAOInterface, calibre_table: Table):
+    def add_calibre_table(self, report_doc: AbstractDocumentDAO, calibre_table: Table):
         self._fill_table_with_row_for_container(self.report.transport_units, calibre_table)
         report_doc.append_table(calibre_table)
 
-    def add_conclusion_table(self, report_doc: DocumentDAOInterface, conclusion_table: Table):
+    def add_conclusion_table(self, report_doc: AbstractDocumentDAO, conclusion_table: Table):
         report_doc.append_table(conclusion_table)
 
-    def add_shelf_life_table(self, report_doc: DocumentDAOInterface, shelf_life_table: Table):
+    def add_shelf_life_table(self, report_doc: AbstractDocumentDAO, shelf_life_table: Table):
         self._fill_table_with_row_for_container(self.report.transport_units, shelf_life_table)
         report_doc.append_table(shelf_life_table)
 
-    def add_executor_table(self, report_doc: DocumentDAOInterface, executor_table: Table):
+    def add_executor_table(self, report_doc: AbstractDocumentDAO, executor_table: Table):
         TemplateEngine.replace_in_table(
             table=executor_table, values=self.report, cell_handler=self.document_dao.set_cell_style
         )
         report_doc.append_table(executor_table)
 
-    def add_pictures_of_thermographs(self, report_doc: DocumentDAOInterface):
+    def add_pictures_of_thermographs(self, report_doc: AbstractDocumentDAO):
         for TU in self.report.transport_units:
             for thermograph in TU.temperature.thermographs:
                 report_doc.append_paragraph(f"Контейнер: {TU.number}\nНомер датчика:{thermograph.number}\n")

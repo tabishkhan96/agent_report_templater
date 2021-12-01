@@ -2,7 +2,7 @@ import logging
 import os
 from copy import deepcopy
 from io import BytesIO
-from typing import List, Type, BinaryIO, Optional, Union
+from typing import List, Type, Optional, Union
 from fastapi import UploadFile
 from fastapi.responses import FileResponse
 from dynaconf import settings
@@ -11,13 +11,10 @@ from pydantic import BaseModel
 from PIL import Image
 from urllib.parse import unquote
 
-from src.repository.dao import DocumentDAOInterface
-from src.repository.exceptions import DraftDocumentNotFoundException, DocumentTemplateCorruptedException
-from src.repository.models import (
-    Table, Row, BaseReport, SelfImportReport, SelfImportOnAutoReport, PickupFromSupplierReport, TransportUnit,
-    Container, Photo
-)
-from src.repository.report_strategies import ReportCreationBaseStrategy, SelfImportReportCreationStrategy
+from .document_daos import AbstractDocumentDAO, Table
+from .exceptions import DraftDocumentNotFoundException, DocumentTemplateCorruptedException
+from .models import BaseReport, SelfImportReport, SelfImportOnAutoReport, PickupFromSupplierReport, Photo
+from .report_strategies import ReportCreationBaseStrategy, SelfImportReportCreationStrategy
 
 
 # TODO
@@ -37,9 +34,9 @@ from src.repository.report_strategies import ReportCreationBaseStrategy, SelfImp
 class AgentReportRepository:
     """Репозиторий бизнес-логики приложения"""
 
-    def __init__(self, document_dao: Type[DocumentDAOInterface]):
+    def __init__(self, document_dao: Type[AbstractDocumentDAO]):
         self.logger: logging.Logger = logging.getLogger("repository")
-        self.document_dao: Type[DocumentDAOInterface] = document_dao
+        self.document_dao: Type[AbstractDocumentDAO] = document_dao
         self.doc_filling_strategies_mapping: dict[Type[BaseModel], Type[ReportCreationBaseStrategy]] = {
             SelfImportReport: SelfImportReportCreationStrategy,
             SelfImportOnAutoReport: ...,

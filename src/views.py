@@ -1,10 +1,10 @@
 from typing import List, Union
 
-from fastapi import Body, APIRouter, Path, UploadFile, File
+from fastapi import Body, APIRouter, UploadFile
 from fastapi.responses import FileResponse
 
-from src.repository.configuration import AgentReportRepositoryConfigurator
-from src.repository.models import BaseReport, SelfImportReport, SelfImportOnAutoReport, PickupFromSupplierReport
+from .repository.configuration import AgentReportRepositoryConfigurator
+from .repository.models import SelfImportReport, SelfImportOnAutoReport, PickupFromSupplierReport
 
 REPOSITORY = AgentReportRepositoryConfigurator().repository()
 

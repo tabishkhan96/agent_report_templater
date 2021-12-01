@@ -6,8 +6,8 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from src.repository.exceptions import AppException
-from src.views import report_api
+from .repository.exceptions import AppException
+from .views import report_api
 
 
 logger: logging.Logger = logging.getLogger("app")

@@ -1,3 +1,4 @@
+from importlib import import_module
 import inspect
 import os
 from typing import Dict, Type, Optional
@@ -7,22 +8,23 @@ from dynaconf import settings
 import logging
 import logging.config
 
-from src.repository.exceptions import WrongDocumentTypeException
-from src.repository.repository import AgentReportRepository
-from src.repository import dao
+from .exceptions import WrongDocumentTypeException
+from .repository import AgentReportRepository
+from .document_daos import AbstractDocumentDAO
 
 
 class AgentReportRepositoryConfigurator:
     def __init__(self):
         self.logger: logging.Logger = logging.getLogger("configurator")
         self.__setup_logger(settings.LOGGING)
+        package_members: list[tuple[str, type]] = inspect.getmembers(import_module('src.repository.document_daos'))
         self.doc_dao_types: Dict[str, type] = {
-            name[:-11].lower(): dao_class for name, dao_class in inspect.getmembers(dao) if name.endswith('DocumentDAO')
+            name[:-11].lower(): dao_class for name, dao_class in package_members if name.endswith('DocumentDAO')
         }
 
     @property
     def documents_dao(self):
-        dao_class: Type[dao.DocumentDAOInterface] = self.doc_dao_types.get(settings.DOC_TYPE)
+        dao_class: Type[AbstractDocumentDAO] = self.doc_dao_types.get(settings.DOC_TYPE)
         if not dao_class:
             raise WrongDocumentTypeException
         return dao_class

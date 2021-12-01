@@ -2,7 +2,7 @@ import re
 from typing import Dict, Any, Union, Callable, Optional, Final
 from pydantic import BaseModel
 
-from src.repository.models import Table, Cell
+from .document_daos import Table, Cell
 
 
 class TemplateEngine:

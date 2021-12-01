@@ -1,54 +1,9 @@
 import datetime
 import re
-from abc import ABC, abstractmethod
 from io import BytesIO
 from base64 import b64decode
 from typing import List, Optional
 from pydantic import BaseModel, validator
-
-
-class Cell(ABC):
-    """Интерфейс ячеек таблиц, использующихся в репозитории бизнес-логики"""
-    text: str
-    paragraphs: List
-
-
-class Row(ABC):
-    """Интерфейс строк таблиц, использующихся в репозитории бизнес-логики"""
-    height: int
-
-    @property
-    @abstractmethod
-    def cells(self) -> List[Cell]:
-        ...
-
-
-class Column(ABC):
-    """Интерфейс столбцов таблиц, использующихся в репозитории бизнес-логики"""
-    width: int
-
-    @property
-    @abstractmethod
-    def cells(self) -> List[Cell]:
-        ...
-
-
-class Table(ABC):
-    """Интерфейс таблиц, использующихся в репозитории бизнес-логики"""
-    columns: list[Column]
-    rows: list[Row]
-
-    @abstractmethod
-    def add_row(self) -> Row:
-        ...
-
-    @abstractmethod
-    def column_cells(self, column_number: int) -> List[Cell]:
-        ...
-
-    @abstractmethod
-    def row_cells(self, row_number: int) -> List[Cell]:
-        ...
 
 
 class Photo(BaseModel):
