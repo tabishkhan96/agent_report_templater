@@ -17,7 +17,7 @@ class AgentReportRepositoryConfigurator:
     def __init__(self):
         self.logger: logging.Logger = logging.getLogger("configurator")
         self.__setup_logger(settings.LOGGING)
-        package_members: list[tuple[str, type]] = inspect.getmembers(import_module('src.repository.document_daos'))
+        package_members: list[tuple[str, type]] = inspect.getmembers(import_module('appserver.core.document_daos'))
         self.doc_dao_types: Dict[str, type] = {
             name[:-11].lower(): dao_class for name, dao_class in package_members if name.endswith('DocumentDAO')
         }

@@ -3,8 +3,8 @@ from typing import List, Union
 from fastapi import Body, APIRouter, UploadFile
 from fastapi.responses import FileResponse
 
-from .repository.configuration import AgentReportRepositoryConfigurator
-from .repository.models import SelfImportReport, SelfImportOnAutoReport, PickupFromSupplierReport
+from .core.configuration import AgentReportRepositoryConfigurator
+from .core.models import SelfImportReport, SelfImportOnAutoReport, PickupFromSupplierReport
 
 REPOSITORY = AgentReportRepositoryConfigurator().repository()
 
