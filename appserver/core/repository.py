@@ -138,12 +138,14 @@ class AgentReportRepository:
         return filename.replace('/', '')
 
     def _fill_pictures_table(self, photos_table: Table, photos: list[Photo]) -> Table:
-        images: list[Image] = [Image.open(photo.file).rotate(360 - photo.rotation) for photo in photos if photo.file]
-        photo_frame_ratio: float = photos_table.columns[0].width / photos_table.rows[0].height
-        map(lambda img: img.resize((image.size[1] * photo_frame_ratio, image.size[1])), images)
+        images: list[Image] = [
+            Image.open(photo.file).rotate(360 - photo.rotation, expand=True) for photo in photos if photo.file
+        ]
         cells = [cell for n in range(2) for cell in photos_table.row_cells(n)]
         for n, image in enumerate(images):
             img_byte_array = BytesIO()
             image.save(img_byte_array, format='PNG')
-            self.document_dao.insert_picture_into_cell(cells[n], img_byte_array)
+            self.document_dao.insert_picture_into_cell(
+                cells[n], img_byte_array, width=photos_table.columns[0].width, height=photos_table.rows[0].height
+            )
         return photos_table
