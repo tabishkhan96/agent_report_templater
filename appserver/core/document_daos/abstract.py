@@ -17,7 +17,7 @@ class Cell(ABC):
 
 class Row(ABC):
     """Интерфейс строк таблиц, использующихся в репозитории бизнес-логики"""
-    height: int
+    height: float
 
     @property
     @abstractmethod
@@ -27,7 +27,7 @@ class Row(ABC):
 
 class Column(ABC):
     """Интерфейс столбцов таблиц, использующихся в репозитории бизнес-логики"""
-    width: int
+    width: float
 
     @property
     @abstractmethod

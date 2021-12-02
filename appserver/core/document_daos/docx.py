@@ -29,7 +29,7 @@ class DocxRowAdapter(Row, BaseAdapter):
     """PyDocx table row adapter class"""
     @property
     def height(self) -> float:
-        return Cm(self._source.height)
+        return self._source.height.cm
 
     @property
     def cells(self) -> List[Cell]:
@@ -40,7 +40,7 @@ class DocxColumnAdapter(Column, BaseAdapter):
     """PyDocx table column adapter class"""
     @property
     def width(self) -> float:
-        return Cm(self._source.width)
+        return self._source.width.cm
 
     @property
     def cells(self) -> List[Cell]:
