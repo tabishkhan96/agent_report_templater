@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/tander_report_template.iml" filepath="$PROJECT_DIR$/.idea/tander_report_template.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/agent_report_templater.iml" filepath="$PROJECT_DIR$/.idea/agent_report_templater.iml" />
     </modules>
   </component>
 </project>

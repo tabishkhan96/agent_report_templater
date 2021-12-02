@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="pytest in agent report templater" type="tests" factoryName="py.test">
-    <module name="tander_report_template" />
+    <module name="agent_report_templater" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
     <envs>

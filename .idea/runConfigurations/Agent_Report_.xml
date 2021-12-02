@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Agent Report " type="PythonConfigurationType" factoryName="Python">
-    <module name="tander_report_template" />
+    <module name="agent_report_templater" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
     <envs>
