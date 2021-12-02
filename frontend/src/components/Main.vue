@@ -3,8 +3,7 @@
     <h1> Сюрвейерские отчеты </h1>
     <hr>
     <br>
-    <div v-if="message" class="alert">{{ message }}<span class="closebtn" @click="message=''">&times;</span></div>
-    <br>
+    <MessageBox v-if="message" :message="message" @closeMessageEvent="message=''"></MessageBox>
     <div class="container">
       <div class="row">
         <table class="table table-hover">
@@ -94,6 +93,7 @@ import Gallery from './Gallery.vue';
 import SelfImportApplicationsTable from "./SelfImportApplicationsTable";
 import ThermographsData from "./ThermographsData";
 import PalletsData from "./PalletsData";
+import MessageBox from "./MessageBox";
 
 export default {
   data() {
@@ -121,6 +121,7 @@ export default {
     SelfImportApplicationsTable,
     ThermographsData,
     PalletsData,
+    MessageBox,
   },
   computed: {
     inspectionDate () {
@@ -214,7 +215,6 @@ export default {
         link.click();
         this.docFileName = fileName;
         this.attachPhotos = true;
-        this.message = '';
         this.textFinished = false;
         this.scrollToBottom();
       } catch (error) {
@@ -258,27 +258,4 @@ export default {
 </script>
 
 <style scoped>
-  .alert {
-    padding: 20px;
-    background-color: #f44336; /* Red */
-    color: white;
-    font-weight: bold;
-    margin-bottom: 15px;
-  }
-
-  /* The close button */
-  .closebtn {
-    margin-left: 15px;
-    color: white;
-    float: right;
-    font-size: 22px;
-    line-height: 20px;
-    cursor: pointer;
-    transition: 0.3s;
-  }
-
-  /* When moving the mouse over the close button */
-  .closebtn:hover {
-    color: black;
-  }
 </style>

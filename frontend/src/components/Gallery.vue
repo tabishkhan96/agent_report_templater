@@ -2,7 +2,7 @@
   <div class="container">
     <div class="row">
       <div>
-        <div v-if="message" class="alert">{{ message }}<span class="closebtn" @click="message=''">&times;</span></div>
+        <MessageBox v-if="message" :message="message" @closeMessageEvent="message=''"></MessageBox>
         <br>
         <input type="file" multiple ref="pictures" accept="image/jpg,image/jpeg,image/png" style="display: none" @change="getPicturesFromField">
         <button @click="$refs.pictures.click()" class="btn btn-success" style="margin: 15px">
@@ -66,6 +66,7 @@
 </template>
 
 <script>
+import MessageBox from "./MessageBox";
 
 export default {
   data() {
@@ -76,6 +77,9 @@ export default {
       report: this.$store.state.report,
       message: ''
     };
+  },
+  components: {
+    MessageBox,
   },
   props: ["transportUnitNumber"],
   computed: {
@@ -96,7 +100,6 @@ export default {
           return
         }
       }
-      this.message = '';
       this.photosSet = true;
       this.setIDsForPictures(files);
     },
@@ -183,30 +186,6 @@ export default {
     padding: 10px;
     box-shadow: 0 0 10px 0 rgba(0,0,0,0.1);
     border-radius: 3px;
-  }
-
-  .alert {
-    padding: 20px;
-    background-color: #f44336; /* Red */
-    color: white;
-    font-weight: bold;
-    margin-bottom: 15px;
-  }
-
-  /* The close button */
-  .closebtn {
-    margin-left: 15px;
-    color: white;
-    float: right;
-    font-size: 22px;
-    line-height: 20px;
-    cursor: pointer;
-    transition: 0.3s;
-  }
-
-  /* When moving the mouse over the close button */
-  .closebtn:hover {
-    color: black;
   }
 
   .caption {
