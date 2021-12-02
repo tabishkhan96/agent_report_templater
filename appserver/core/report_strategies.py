@@ -155,8 +155,8 @@ class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
             for thermograph in TU.temperature.thermographs:
                 report_doc.append_paragraph(f"Контейнер: {TU.number}\nНомер датчика:{thermograph.number}\n")
                 if thermograph.graph:
-                    report_doc.append_picture(thermograph.graph.file)
-            report_doc.add_page_break()
+                    page_size: tuple[float, float] = report_doc.get_page_size()
+                    report_doc.append_picture(thermograph.graph.file, height=page_size[0] * .3, width=page_size[1] * .7)
 
     def _fill_table_with_row_for_container(self, containers: list[Container], table: Table):
         cells_content: list[str] = []

@@ -105,6 +105,10 @@ class AbstractDocumentDAO(ABC):
     def add_section(self, horizontal: bool = False):
         """"""
 
+    @abstractmethod
+    def get_page_size(self) -> tuple[float, float]:
+        """"""
+
     @classmethod
     @abstractmethod
     def set_cell_style(cls, cell: Cell, style: Style = DEFAULT_STYLE):

@@ -114,6 +114,10 @@ class DocxDocumentDAO(AbstractDocumentDAO):
             section.orientation = WD_ORIENTATION.LANDSCAPE
             section.page_width, section.page_height = section.page_height, section.page_width
 
+    def get_page_size(self) -> tuple[float, float]:
+        section = self._document.sections[-1]
+        return section.page_height.cm, section.page_width.cm
+
     @classmethod
     def set_cell_style(cls, cell: Cell, style: Style = DEFAULT_STYLE):
         paragraph = next(cell.paragraphs)
