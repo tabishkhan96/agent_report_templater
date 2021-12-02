@@ -1,6 +1,6 @@
 from typing import List, Union
 
-from fastapi import Body, APIRouter, UploadFile
+from fastapi import Body, APIRouter, UploadFile, File
 from fastapi.responses import FileResponse
 
 from .core.configuration import AgentReportRepositoryConfigurator
@@ -21,11 +21,16 @@ async def create_report(
     return REPOSITORY.create_report(report_data)
 
 
-@report_api.get("/", response_model=List[BaseReport], name="Отчеты в работе")
-async def reports_in_progress() -> List[BaseReport]:
+@report_api.get("/{filename}", name="Отчеты в работе")
+async def reports_in_progress(filename: str) -> Union[List[dict], FileResponse]:
     """Отчеты в работе."""
-    return REPOSITORY.get_reports()
+    return REPOSITORY.get_report(filename)
 
+
+@report_api.post("/{filename}", name="Замена отчета")
+async def update_report(filename: str, report_file: UploadFile = File(...)) -> str:
+    """Заменить файл отчета."""
+    return REPOSITORY.update_report(filename, report_file)
 
 
 @report_api.patch("/", name="")

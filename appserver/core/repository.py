@@ -68,8 +68,28 @@ class AgentReportRepository:
             media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
 
-    def get_reports(self) -> List[BaseReport]:
-        raise NotImplemented
+    def get_report(self, filename: str) -> Union[List[dict], FileResponse]:
+        report_files = os.scandir(settings.REPOSITORY.REPORTS_DIR)
+        if not filename:
+            return [{'name': file.name,
+                     'size': file.stat().st_size,
+                     'modified': file.stat().st_mtime} for file in report_files]
+        filename = unquote(filename)
+        if filename not in (file.name for file in report_files):
+            raise DraftDocumentNotFoundException
+        return FileResponse(
+            f"{settings.REPOSITORY.REPORTS_DIR}/{filename}",
+            filename=filename,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+
+    def update_report(self, filename: str, report_file: UploadFile) -> str:
+        filename = unquote(filename)
+        if filename not in os.listdir(settings.REPOSITORY.REPORTS_DIR):
+            raise DraftDocumentNotFoundException
+        with open(f"{settings.REPOSITORY.REPORTS_DIR}/{filename}", "wb") as doc:
+            doc.write(report_file.file.read())
+        return filename
 
     def add_pictures(self, report: BaseReport) -> FileResponse:
         """

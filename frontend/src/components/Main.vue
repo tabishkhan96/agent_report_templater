@@ -58,11 +58,11 @@
     <button v-if="textFinished" @click="createReport" class="btn btn-success">Создать текстовую часть отчета</button>
     <input type="file"
            ref="editedReportFile"
-           accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+           accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
            style="display: none"
-           @change="replaceReport"
+           @change="replaceReport($event)"
     >
-    <button v-if="attachPhotos" @click="$refs.editedReportFile.click" class="btn btn-primary" style="margin-left: 10px">
+    <button v-if="attachPhotos" @click="$refs.editedReportFile.click" class="btn btn-primary">
       Отправить измененный отчет
     </button>
     <br>
@@ -223,8 +223,18 @@ export default {
         console.error(error);
       }
     },
-    async replaceReport() {
-
+    async replaceReport(event) {
+      let formData = new FormData();
+      formData.append('report_file', event.target.files[0]);
+      let encodedFileName = encodeURIComponent(this.docFileName);
+      let config = {headers : {'Content-Type': 'multipart/form-data'}};
+      try {
+        await axios.post(`http://0.0.0.0:8080/report/${encodedFileName}`, formData, config);
+      } catch (error) {
+        this.message = "Не удалось заменить документ!";
+        // eslint-disable-next-line
+        console.error(error);
+      }
     },
     async sendReportWithPhotos() {
       console.log(this.report);
