@@ -63,6 +63,7 @@ class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
         if not temperature_table_template:
             raise DocumentTemplateCorruptedException('Отсутствует шаблон таблицы температурных данных')
         self.add_temperature_table(report_doc, temperature_table_template)
+        report_doc.add_page_break()
 
         tally_account_and_pallets_tables = self._get_tables_from_template('tally_account_template')
         pallets_table_template: Optional[Table] = next(tally_account_and_pallets_tables, None)
@@ -87,7 +88,6 @@ class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
         self.add_conclusion_table(report_doc, conclusion_table)
         self.add_shelf_life_table(report_doc, shelf_life_table)
         self.add_executor_table(report_doc, executor_table)
-        report_doc.add_page_break()
         self.add_pictures_of_thermographs(report_doc)
         return report_doc
 
@@ -109,6 +109,7 @@ class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
                 table=tally_account_table, values=container, cell_handler=self.document_dao.set_cell_style
             )
             report_doc.append_table(tally_account_table)
+            report_doc.add_page_break()
 
     def add_inspection_result_tables(
             self,
@@ -152,6 +153,7 @@ class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
 
     def add_pictures_of_thermographs(self, report_doc: AbstractDocumentDAO):
         for TU in self.report.transport_units:
+            report_doc.add_page_break()
             for thermograph in TU.temperature.thermographs:
                 report_doc.append_paragraph(f"Контейнер: {TU.number}\nНомер датчика:{thermograph.number}\n")
                 if thermograph.graph:
