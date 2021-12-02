@@ -66,9 +66,9 @@
                             <label> Номер датчика: <input required type="text" v-model.lazy="thermograph.number"></label>
                           </td>
                           <td class="col-2">
-<!--                            <label> График:-->
-<!--                              <input type="file" accept="image/jpg,image/jpeg,image/png" @change="thermograph.graph = $event.target.files[0]">-->
-<!--                            </label>-->
+                            <label> График:
+                              <input type="file" accept="image/jpg,image/jpeg,image/png" @change="addThermographPicture(thermograph, $event)">
+                            </label>
                           </td>
                           <td class="col-2"> Мин. темп. <input required v-model.lazy="thermograph.min" type="number" step="0.1"></td>
                           <td class="col-2"> Макс. темп. <input required v-model.lazy="thermograph.max" type="number" step="0.1"></td>
@@ -102,6 +102,7 @@ export default {
       tableHeadersList: ['ТЕ', 'Рекомендованная темп.',	'Пульпа мин.',	'Пульпа макс.',	'Кол-во термографов',	'Состояние'],
       report: this.$store.state.report,
       thermographDataModel: this.$store.state.thermographDataModel,
+      photoModel: this.$store.state.photoModel,
       editable: true
     }
   },
@@ -118,7 +119,15 @@ export default {
       for (let i = 0; i < numberOfThermographs; i++) {
         transportUnit.temperature.thermographs.push(Object.assign({}, this.thermographDataModel))
       }
-    }
+    },
+    addThermographPicture(thermograph, event) {
+      thermograph.graph = Object.assign({}, this.photoModel);
+      let reader = new FileReader();
+      reader.readAsDataURL(event.target.files[0]);
+      reader.onload = event => {
+          thermograph.graph.file = event.target.result;
+      };
+    },
   },
 };
 </script>

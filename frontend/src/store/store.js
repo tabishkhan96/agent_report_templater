@@ -47,6 +47,11 @@ const store = createStore({
         min: 0.0,
         max: 0.0
       },
+      photoModel: {
+        id: 0,
+        file: '',
+        rotation: 0
+      }
     };
   },
   mutations: {
