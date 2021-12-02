@@ -102,8 +102,10 @@ class DocxDocumentDAO(AbstractDocumentDAO):
         paragraph.runs[0].italic = style.italic
         paragraph.runs[0].font.name = style.font
 
-    def append_picture(self, picture: BinaryIO, height: float, width: float):
-        self._document.add_paragraph().add_run().add_picture(picture, width=Cm(width), height=Cm(height))
+    def append_picture(self, picture: BinaryIO, height: float, width: float, alignment: str = 'center'):
+        paragraph = self._document.add_paragraph()
+        paragraph.alignment = getattr(WD_PARAGRAPH_ALIGNMENT, alignment.upper())
+        paragraph.add_run().add_picture(picture, width=Cm(width), height=Cm(height))
 
     def add_page_break(self):
         self._document.add_page_break()

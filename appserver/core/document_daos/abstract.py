@@ -94,7 +94,7 @@ class AbstractDocumentDAO(ABC):
         """Add text paragraph to the end of Doc"""
 
     @abstractmethod
-    def append_picture(self, picture: BinaryIO, height: float, width: float):
+    def append_picture(self, picture: BinaryIO, height: float, width: float, alignment: str = 'center'):
         """Add a picture to the end of Doc"""
 
     @abstractmethod
