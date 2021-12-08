@@ -126,6 +126,15 @@ class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
             report_doc.append_table(pallets_table)
 
             tally_account_table = deepcopy(tally_account_table_template)
+            last_row_texts: list[str] = [cell.text for cell in tally_account_table_template.rows[-1].cells]
+            tally_account_table.delete_row(-1)
+            for num in range(2, container.pallets + 1):
+                row: Row = tally_account_table.add_row()
+                row.cells[0].text = str(num)
+            last_row: Row = tally_account_table.add_row()
+            for (n, cell) in enumerate(last_row.cells):
+                cell.text = last_row_texts[n]
+
             TemplateEngine.replace_in_table(
                 table=tally_account_table, values=container, cell_handler=self.document_dao.set_cell_style
             )
