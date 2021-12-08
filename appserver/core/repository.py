@@ -130,9 +130,8 @@ class AgentReportRepository:
 
     def _build_report_name(self, report: BaseReport):
         suppliers: set[str] = {unit.supplier for unit in report.transport_units}
-        cargos: set[str] = {cargo for unit in report.transport_units for cargo in unit.cargo}
 
-        filename: str = f"{report.number}_{report.order}_{'_'.join(suppliers)}_{'_'.join(cargos)}_" \
+        filename: str = f"{report.number}_{report.order}_{'_'.join(suppliers)}_{'_'.join(report.all_cargos)}_" \
                         f"{'_'.join((tu.number for tu in report.transport_units))}" \
                         f".{settings.DOC_TYPE}"
         return filename.replace('/', '')

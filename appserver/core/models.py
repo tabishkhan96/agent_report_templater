@@ -92,20 +92,28 @@ class BaseReport(BaseModel):
     @property
     def header(self) -> dict:
         """Data representation for Report's Header"""
-        cargos: set[str] = {cargo for unit in self.transport_units for cargo in unit.cargo}
-        cargos_in_english: set[str] = {cargo for unit in self.transport_units for cargo in unit.cargo_in_english}
+        cargos: set[str] = self.all_cargos
+        cargos_in_english: set[str] = self.all_cargos_in_english
         return {
             'report_number': self.number,
             'place_of_inspection': self.place_of_inspection,
             'inspection_date': self.inspection_date,
             'shipper': {unit.supplier for unit in self.transport_units},
             'cargo': [
-                f'{cargo} / {cargo_in_english}' for cargo, cargo_in_english in zip(cargos, cargos_in_english)
+                f'{cargo.capitalize()}/{cargo_in_english}' for cargo, cargo_in_english in zip(cargos, cargos_in_english)
             ],
             'transport_units': [unit.number for unit in self.transport_units],
             'invoice': {unit.invoice for unit in self.transport_units},
             'order': self.order,
         }
+
+    @property
+    def all_cargos_in_english(self) -> set[str]:
+        return {cargo for unit in self.transport_units for cargo in unit.cargo_in_english}
+
+    @property
+    def all_cargos(self) -> set[str]:
+        return {cargo for unit in self.transport_units for cargo in unit.cargo}
 
 
 class SelfImportReport(BaseReport):
