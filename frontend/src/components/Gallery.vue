@@ -11,7 +11,8 @@
         <br>
         <table style="margin: auto">
           <tr v-for="chunk in picturesListChunked" :key="chunk" class="d-flex">
-            <td @drop="onDrop($event, chunk[0])"
+            <td v-if="chunk[0]"
+                @drop="onDrop($event, chunk[0])"
                 @dragover.prevent
                 @dragenter.prevent
                 class="picture-cell"
@@ -26,7 +27,7 @@
               <div class="caption">
                 <span class="manipulation-btn" @click="rotatePictureClockwise(chunk[0].id)">&#8635;</span>
                 <span class="manipulation-btn" @click="rotatePictureCounterClockwise(chunk[0].id)">&#8634;</span>
-                <span class="manipulation-btn" @click="picturesList.splice(chunk[0].id, 1)">&times;</span>
+                <span class="manipulation-btn" @click="picturesList.splice(chunk[0].id, 1);recountPictureList()">&times;</span>
               </div>
             </td>
             <td v-if="chunk[1]"
@@ -45,7 +46,7 @@
               <div class="caption">
                 <span class="manipulation-btn" @click="rotatePictureClockwise(chunk[1].id)">&#8635;</span>
                 <span class="manipulation-btn" @click="rotatePictureCounterClockwise(chunk[1].id)">&#8634;</span>
-                <span class="manipulation-btn" @click="picturesList.splice(chunk[1].id, 1)">&times;</span>
+                <span class="manipulation-btn" @click="picturesList.splice(chunk[1].id, 1);recountPictureList()">&times;</span>
               </div>
             </td>
           </tr>
@@ -109,7 +110,7 @@ export default {
         let reader = new FileReader();
         reader.readAsDataURL(files[i]);
         reader.onload = event => {
-            this.picturesList.push({id: i, file: event.target.result, rotation: 0});
+            this.picturesList[i] = {id: i, file: event.target.result, rotation: 0};
         };
       }
     },
