@@ -52,6 +52,10 @@ class Table(ABC):
     def row_cells(self, row_number: int) -> Iterator[Cell]:
         ...
 
+    @abstractmethod
+    def delete_row(self, row_number: int):
+        ...
+
 
 @dataclass
 class Style:

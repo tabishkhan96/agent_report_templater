@@ -64,10 +64,8 @@ class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
         жизни и данных о исполнителе.
         """
         self.fill_header_table(report_doc)
-        temperature_table_template: Optional[Table] = next(self._get_tables_from_template('temperature_template'), None)
-        if not temperature_table_template:
-            raise DocumentTemplateCorruptedException('Отсутствует шаблон таблицы температурных данных')
-        self.add_temperature_table(report_doc, temperature_table_template)
+
+        self.add_temperature_table(report_doc)
         report_doc.add_page_break()
 
         tally_account_and_pallets_tables = self._get_tables_from_template('tally_account_template')
@@ -158,6 +156,33 @@ class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
                 raise DocumentTemplateCorruptedException(f'Отсутствует таблица результатов для {cargo}')
 
             self._fill_table_with_row_for_container(containers, table)
+            report_doc.append_table(table)
+            self.add_colors_tables(report_doc, cargo, containers, self._get_template_dao('colors_tables_template'))
+
+    def add_colors_tables(
+            self,
+            report_doc: AbstractDocumentDAO,
+            cargo: str,
+            containers_with_cargo: list[Container],
+            colors_tables_template: AbstractDocumentDAO
+    ):
+        cargos_in_colors_tables_template = list(
+            filter(lambda pr: pr, map(lambda pr: pr.lower().strip(), colors_tables_template.get_paragraphs()))
+        )
+        colors_tables_template_tables: list[Table] = list(colors_tables_template.get_tables())
+        try:
+            tbl_number: int = cargos_in_colors_tables_template.index(cargo)
+        except ValueError:
+            return  # if that cargo isn't mentioned in colors_tables_template we don't need to insert color table
+        try:
+            table = deepcopy(colors_tables_template_tables[tbl_number])
+        except IndexError:
+            raise DocumentTemplateCorruptedException(f'Отсутствует таблица цветности для {cargo}')
+        self._fill_table_with_row_for_container(containers_with_cargo, table)
+        report_doc.append_table(table)
+        if cargo == 'яблоко':
+            table = deepcopy(colors_tables_template_tables[tbl_number + 1])
+            self._fill_table_with_row_for_container(containers_with_cargo, table)
             report_doc.append_table(table)
 
     def add_calibre_table(self, report_doc: AbstractDocumentDAO, calibre_table: Table):

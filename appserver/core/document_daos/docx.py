@@ -68,6 +68,11 @@ class DocxTableAdapter(Table, BaseAdapter):
         for cell in self._source.row_cells(row_number):
             yield DocxCellAdapter(cell)
 
+    def delete_row(self, row_number: int):
+        tbl = self._source._tbl
+        tr = self.rows[row_number]._source._tr
+        tbl.remove(tr)
+
 
 class DocxDocumentDAO(AbstractDocumentDAO):
     """.docx documents access class"""
