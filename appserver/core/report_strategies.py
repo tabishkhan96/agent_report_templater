@@ -40,9 +40,12 @@ class ReportCreationBaseStrategy(ABC):
         )
 
     def _get_template_dao(self, template_name: str) -> AbstractDocumentDAO:
-        return self.document_dao(
-            f"{settings.REPOSITORY.TEMPLATES_DIR}/{type(self.report).__name__}/{template_name}.{settings.DOC_TYPE}"
-        )
+        try:
+            return self.document_dao(
+                f"{settings.REPOSITORY.TEMPLATES_DIR}/{type(self.report).__name__}/{template_name}.{settings.DOC_TYPE}"
+            )
+        except FileNotFoundError as e:
+            raise DocumentTemplateNotFoundException from e
 
     def _get_tables_from_template(self, template_name: str) -> Iterator[Table]:
         return self._get_template_dao(template_name).get_tables()
@@ -108,9 +111,12 @@ class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
 
         return report_doc
 
-    def add_temperature_table(self, report_doc: AbstractDocumentDAO, temperature_table: Table):
-        self._fill_table_with_row_for_container(self.report.transport_units, temperature_table)
-        report_doc.append_table(temperature_table)
+    def add_temperature_table(self, report_doc: AbstractDocumentDAO):
+        temperature_table_template: Optional[Table] = next(self._get_tables_from_template('temperature_template'), None)
+        if not temperature_table_template:
+            raise DocumentTemplateCorruptedException('Отсутствует шаблон таблицы температурных данных')
+        self._fill_table_with_row_for_container(self.report.transport_units, temperature_table_template)
+        report_doc.append_table(temperature_table_template)
 
     def add_tally_account_and_pallets_tables(
             self, report_doc: AbstractDocumentDAO, pallets_table_template: Table, tally_account_table_template: Table
@@ -146,7 +152,10 @@ class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
                 tbl_number: int = cargos_in_inspection_result_template.index(cargo) + 1
             except ValueError:
                 tbl_number = 0
-            table = deepcopy(inspection_result_template_tables[tbl_number])
+            try:
+                table = deepcopy(inspection_result_template_tables[tbl_number])
+            except IndexError:
+                raise DocumentTemplateCorruptedException(f'Отсутствует таблица результатов для {cargo}')
 
             self._fill_table_with_row_for_container(containers, table)
             report_doc.append_table(table)
