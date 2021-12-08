@@ -21,9 +21,11 @@ class TemplateEngine:
         if isinstance(values, BaseModel):
             values: dict = values.dict()
         for match in re.finditer(cls.key_pattern, value):
-            value = cls._get_nested_attr(values, match.group()[2:-2].strip(), match.group())
-            if isinstance(value, (list, tuple, set)):
-                value = '\n'.join(value)
+            key: str = match.group()
+            key_substitution = cls._get_nested_attr(values, key[2:-2].strip(), key)
+            if isinstance(key_substitution, (list, tuple, set)):
+                key_substitution = '\n'.join(key_substitution)
+            value = value.replace(key, str(key_substitution))
         return str(value)
 
     @classmethod
