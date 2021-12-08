@@ -81,7 +81,7 @@
     </button>
     <br>
     <button v-if="reportFinished" @click="resetGlobalVariables(true)" class="btn btn-success" style="margin: 10px">
-      Вернуться в начало
+      Начать новый отчет
     </button>
   </div>
 </template>

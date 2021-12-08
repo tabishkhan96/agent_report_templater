@@ -85,18 +85,18 @@ class TransportUnit(BaseModel):
     date: str
     calibre: List[str]
     temperature: TemperatureData
-    pallets: int = 0
+    pallets: int
     damaged_pallets: int = 0
-    boxes: int = 0
+    boxes: int
     damaged_boxes: int = 0
-    cargo_damage: float = 0
+    cargo_damage: float = 0.0
     empty_boxes: int = 0
     not_full_boxes: int = 0
     photos: list[Photo] = []
 
     @validator("cargo", allow_reuse=True)
     def strip_cargo(cls, value: List[str]):
-        return [v.strip() for v in value]
+        return [v.strip().lower() for v in value]
 
 
 class Container(TransportUnit):
