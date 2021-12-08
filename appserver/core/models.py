@@ -30,6 +30,16 @@ class ThermographData(ThermometerBoundaries):
     graph: Optional[Photo]
     worked: str
 
+    @validator("worked")
+    def set_worked_status(cls, value):
+        statuses_mapping = {
+            "0": "Нет/No",
+            "1": "Да/Yes",
+            "2": "Не работал/Did not work",
+            "3": "Работал некорректно/Did not work correctly"
+        }
+        return statuses_mapping.get(value, "")
+
 
 class TemperatureData(BaseModel):
     pulp: ThermometerBoundaries
