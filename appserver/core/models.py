@@ -20,9 +20,21 @@ class Photo(BaseModel):
         return BytesIO(b64decode(value[0]) if value else b'')
 
 
+class FloatWithCustomStringification(float):
+    def __str__(self) -> str:
+        """Always show '+' symbol and 1 digit after period when stringified"""
+        if self == 0:
+            return str(0.0)
+        return "{0:+.1f}".format(self)
+
+
 class ThermometerBoundaries(BaseModel):
-    min: float = 0.0
-    max: float = 0.0
+    min: FloatWithCustomStringification
+    max: FloatWithCustomStringification
+
+    @validator('min', 'max', allow_reuse=True)
+    def validate_temperature(cls, value):
+        return FloatWithCustomStringification(value)
 
 
 class ThermographData(ThermometerBoundaries):
