@@ -1,12 +1,14 @@
 from abc import ABC, abstractmethod
 import logging
 from copy import deepcopy
+from datetime import datetime
 from typing import Generator, Optional, Type, Iterator
 from dynaconf import settings
+from num2words import num2words
 
-from .document_daos import AbstractDocumentDAO, Table, Row
-from .exceptions import DocumentTemplateCorruptedException
-from .models import BaseReport, SelfImportReport, Container
+from .document_daos import AbstractDocumentDAO, Table, Row, Style
+from .exceptions import DocumentTemplateCorruptedException, DocumentTemplateNotFoundException
+from .models import BaseReport, SelfImportReport, Container, TemperatureData
 from .template_engine import TemplateEngine
 
 
@@ -89,6 +91,21 @@ class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
         self.add_shelf_life_table(report_doc, shelf_life_table)
         self.add_executor_table(report_doc, executor_table)
         self.add_pictures_of_thermographs(report_doc)
+
+        def has_violations(temp: TemperatureData) -> bool:
+            violations_in_thermographs: bool = any(
+                map(lambda th: abs(th.min - temp.recommended) > 2 or abs(th.max - temp.recommended) > 2,
+                    temp.thermographs)
+            )
+            return violations_in_thermographs or abs(temp.pulp.min - temp.recommended) > 2 or \
+                   abs(temp.pulp.max - temp.recommended) > 2
+
+        containers_with_violations: list[Container] = [
+            unit for unit in self.report.transport_units if has_violations(unit.temperature)
+        ]
+        if containers_with_violations:
+            self.add_letter_of_protest(report_doc, containers_with_violations)
+
         return report_doc
 
     def add_temperature_table(self, report_doc: AbstractDocumentDAO, temperature_table: Table):
@@ -159,6 +176,37 @@ class SelfImportReportCreationStrategy(ReportCreationBaseStrategy):
                 if thermograph.graph:
                     page_size: tuple[float, float] = report_doc.get_page_size()
                     report_doc.append_picture(thermograph.graph.file, height=page_size[0] * .3, width=page_size[1] * .7)
+
+    def add_letter_of_protest(self, report_doc: AbstractDocumentDAO, containers_with_violations: list[Container]):
+        letter_of_protest: Table = deepcopy(next(self._get_tables_from_template('letter_of_protest'), None))
+        if not letter_of_protest:
+            raise DocumentTemplateCorruptedException('Отсутствует шаблон письма протеста')
+        report_doc.add_page_break()
+        report_doc.append_table(letter_of_protest)
+        letter_of_protest: Table = list(report_doc.get_tables())[-1]
+
+        LoP_varaibles: dict = self.report.header
+        LoP_varaibles["date"] = datetime.now().strftime("%d.%m.%Y")
+        LoP_varaibles["cargo"] = ", ".join(self.report.all_cargos_in_english)
+        LoP_varaibles["BL"] = ", ".join(LoP_varaibles["BL"])
+        LoP_varaibles["result"] = ""
+        for container in containers_with_violations:
+            thermographs = container.temperature.thermographs
+            LoP_varaibles["result"] += f"""
+{num2words(len(thermographs)).capitalize()} thermograph(s) found in the container \
+{container.number} and according to {"it's" if len(thermographs) == 1 else "their"} record(s) the temperature during \
+transportation was from {min((th.min for th in thermographs))}°C to {max((th.max for th in thermographs))}°C.\n
+Container {container.number} was opened on {self.report.inspection_date.split(' - ')[0]} and temperature inside was \
+{container.temperature.pulp.min}°C/{container.temperature.pulp.max}°C.\n\n"""
+
+        LoP_varaibles["result"] = LoP_varaibles["result"]
+        TemplateEngine.replace_in_table(
+            table=letter_of_protest,
+            values=LoP_varaibles,
+            cell_handler=lambda cell: self.document_dao.set_cell_style(
+                cell, style=Style(alignment='justify', italic=False, bold=False, font="Times New Roman")
+            )
+        )
 
     def _fill_table_with_row_for_container(self, containers: list[Container], table: Table):
         cells_content: list[str] = []

@@ -34,7 +34,21 @@ class ThermographData(ThermometerBoundaries):
 class TemperatureData(BaseModel):
     pulp: ThermometerBoundaries
     thermographs: List[ThermographData]
-    recommended: float = 0.0
+    recommended: FloatWithCustomStringification
+    violations_affect: str
+
+    @validator("violations_affect")
+    def set_violations(cls, value):
+        statuses_mapping = {
+            "1": "Нет/Нет\nNo/No",
+            "2": "Да/Нет\nYes/No",
+            "3": "Да/Да\nYes/Yes"
+        }
+        return statuses_mapping.get(value, "")
+
+    @validator('recommended', allow_reuse=True)
+    def validate_temperature(cls, value):
+        return FloatWithCustomStringification(value)
 
 
 class TransportUnit(BaseModel):

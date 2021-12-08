@@ -34,6 +34,7 @@ const store = createStore({
       temperatureDataModel: {
         recommended: 0.0,
         pulp: {},
+        violations_affect: '1',
         thermographs: []
       },
       pulpDataModel: {

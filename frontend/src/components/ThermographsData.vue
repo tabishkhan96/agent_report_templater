@@ -26,8 +26,8 @@
                 >
                   <td class="col-2"><b>{{ unit.number }}</b></td>
                   <td class="col-2"><input required v-model.lazy="unit.temperature.recommended" type="number" step="0.1"></td>
-                  <td class="col-2"><input required v-model.lazy="unit.temperature.pulp.min" type="number" step="0.1"></td>
-                  <td class="col-2"><input required v-model.lazy="unit.temperature.pulp.max" type="number" step="0.1"></td>
+                  <td class="col-2"><input required v-model.lazy="unit.temperature.pulp.min" type="number" step="0.1" :max="unit.temperature.pulp.max"></td>
+                  <td class="col-2"><input required v-model.lazy="unit.temperature.pulp.max" type="number" step="0.1" :min="unit.temperature.pulp.min"></td>
                   <td class="col-2">
                     <select required @change="createThermographsList(unit, $event.target.value)">
                       <option value="0">0</option>
@@ -70,8 +70,8 @@
                               <input type="file" accept="image/jpg,image/jpeg,image/png" @change="addThermographPicture(thermograph, $event)">
                             </label>
                           </td>
-                          <td class="col-2"> Мин. темп. <input required v-model.lazy="thermograph.min" type="number" step="0.1"></td>
-                          <td class="col-2"> Макс. темп. <input required v-model.lazy="thermograph.max" type="number" step="0.1"></td>
+                          <td class="col-2"> Мин. темп. <input required v-model.lazy="thermograph.min" type="number" step="0.1" :max="thermograph.max"></td>
+                          <td class="col-2"> Макс. темп. <input required v-model.lazy="thermograph.max" type="number" step="0.1" :min="thermograph.min"></td>
                         </tr>
                       </tbody>
                     </table>
@@ -79,6 +79,26 @@
                 </tr>
               </tbody>
             </table>
+            <div v-if="violations.length">
+              <h4>
+                Обнаружены нарушения температурного режима. Повлияли ли они на качество груза?
+              </h4>
+              <table style="width: 40%; display: inline-table">
+                <tbody>
+                  <tr
+                      v-for="unit in this.violations"
+                      :key="unit.number"
+                      class="d-flex"
+                  >
+                    <td><b>ТЕ  {{unit.number}}</b></td>
+                    <select required v-model.lazy="unit.temperature.violations_affect">
+                      <option value="2">Нет</option>
+                      <option value="3">Да</option>
+                    </select>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
             <br>
             <button
                 type="submit"
@@ -107,6 +127,22 @@ export default {
     }
   },
   emits: ["ThermalDataInsertedEvent"],
+  computed: {
+    violations() {
+      let transportUnitsWithViolations = [];
+      for (let unit of this.report.transport_units) {
+        let temp = unit.temperature;
+        if (Math.abs(temp.pulp.min - temp.recommended) > 2 ||
+            Math.abs(temp.pulp.max - temp.recommended) > 2 ||
+            temp.thermographs.some(thermograph => Math.abs(thermograph.min - temp.recommended) > 2 || Math.abs(thermograph.max - temp.recommended) > 2 )) {
+          transportUnitsWithViolations.push(unit);
+        } else {
+          temp.violations_affect = '1';
+        }
+      }
+      return transportUnitsWithViolations;
+    },
+  },
   methods: {
     continueReport() {
       this.$store.commit('setReport', this.report);
